@@ -374,24 +374,14 @@ app.post('/api/admin/login', (req, res) => {
 
 // Get all blocked dates
 app.get('/api/admin/blocked-dates', (req, res) => {
-  const adminToken = req.headers.authorization;
-  if (adminToken !== `Bearer ${'admin-secret-token-12345'}`) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
   db.all(`SELECT * FROM blocked_dates ORDER BY date ASC`, (err, dates) => {
     if (err) return res.status(500).json({ error: 'Database error' });
-    res.json(dates);
+    res.json(dates || []);
   });
 });
 
 // Delete blocked date
 app.delete('/api/admin/blocked-dates/:id', (req, res) => {
-  const adminToken = req.headers.authorization;
-  if (adminToken !== `Bearer ${'admin-secret-token-12345'}`) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
   db.run(`DELETE FROM blocked_dates WHERE id = ?`, [req.params.id], (err) => {
     if (err) return res.status(500).json({ error: 'Database error' });
     res.json({ success: true });
