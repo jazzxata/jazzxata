@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jazz Xata — A creative mountain retreat in the heart of the Carpathians</title>
+<meta name="description" content="A two-storey cottage tucked into the Carpathian Mountains in Yablunytsya, minutes from Bukovel and Dragobrat. Sleeps up to 5, with a fireplace, sauna, and a quiet creative spirit.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+  :root {
+    --cream: #FAF6EE;
+    --cream-warm: #F0E6D2;
+    --cream-deep: #E8DCC2;
+    --tan: #D9CDB8;
+    --wood: #8B5A3C;
+    --wood-dark: #6B4426;
+    --forest: #4F6F52;
+    --charcoal: #2D2A26;
+    --ink: #1C1A17;
+    --muted: #6B655B;
+    --max-width: 1200px;
+    --error: #C44545;
+    --success: #4F6F52;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--cream);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    line-height: 1.15;
+    color: var(--charcoal);
+    letter-spacing: -0.01em;
+  }
+  h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 600; }
+  h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 1rem; }
+  h3 { font-size: clamp(1.4rem, 2.5vw, 1.75rem); margin-bottom: 0.5rem; }
+  p { margin-bottom: 1rem; }
+  a { color: var(--wood-dark); text-decoration: none; }
+  a:hover { color: var(--forest); }
+  /* ============ NAVIGATION ============ */
+  nav.top {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1rem 2rem;
+    background: rgba(250, 246, 238, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s, padding 0.3s;
+  }
+  nav.top.scrolled { border-bottom-color: var(--tan); padding: 0.75rem 2rem; }
+  .nav-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--charcoal);
+    letter-spacing: 0.02em;
+  }
+  .logo em { font-style: italic; color: var(--wood); }
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+  .nav-links a {
+    color: var(--charcoal);
+    font-weight: 500;
+  }
+  .lang-toggle {
+    display: flex;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+    border: 1px solid var(--tan);
+    border-radius: 999px;
+    padding: 0.25rem;
+    background: var(--cream);
+  }
+  .lang-toggle button {
+    border: none;
+    background: transparent;
+    padding: 0.25rem 0.65rem;
+    cursor: pointer;
+    border-radius: 999px;
+    font-family: inherit;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .lang-toggle button.active {
+    background: var(--charcoal);
+    color: var(--cream);
+  }
+  @media (max-width: 720px) {
+    nav.top { padding: 0.75rem 1rem; }
+    .nav-links a:not(.cta-small):not(.book-link) { display: none; }
+  }
+  /* ============ HERO ============ */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 6rem 1.5rem 3rem;
+    position: relative;
+    background:
+      linear-gradient(rgba(28, 26, 23, 0.45), rgba(28, 26, 23, 0.65)),
+      url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=1200&fit=crop'),
+      linear-gradient(135deg, #6B4426 0%, #2D2A26 50%, #4F6F52 100%);
+    background-size: cover;
+    background-position: center;
+    color: var(--cream);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(139, 90, 60, 0.4) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(79, 111, 82, 0.3) 0%, transparent 40%);
+    pointer-events: none;
+  }
+  .hero-content { position: relative; max-width: 850px; }
+  .hero .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--cream-deep);
+    margin-bottom: 1.5rem;
+    opacity: 0.8;
+  }
+  .hero h1 {
+    color: var(--cream);
+    font-style: italic;
+    font-weight: 500;
+  }
+  .hero .sub {
+    font-size: 1.1rem;
+    margin: 1.5rem auto 2.5rem;
+    max-width: 600px;
+    color: var(--cream-warm);
+    line-height: 1.7;
+  }
+  .cta {
+    display: inline-block;
+    padding: 0.9rem 2rem;
+    background: var(--cream);
+    color: var(--charcoal);
+    border-radius: 2px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    border: 1px solid var(--cream);
+    cursor: pointer;
+  }
+  .cta:hover {
+    background: transparent;
+    color: var(--cream);
+    border-color: var(--cream);
+  }
+  .cta.dark {
+    background: var(--charcoal);
+    color: var(--cream);
+    border-color: var(--charcoal);
+  }
+  .cta.dark:hover {
+    background: transparent;
+    color: var(--charcoal);
+  }
+  .scroll-cue {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--cream-warm);
+    opacity: 0.6;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-50%, 8px); }
+  }
+  /* ============ SECTION SHELL ============ */
+  section { padding: 6rem 1.5rem; }
+  .container { max-width: var(--max-width); margin: 0 auto; }
+  .section-eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--wood);
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+  .alt-bg { background: var(--cream-warm); }
+  .deep-bg { background: var(--cream-deep); }
+  /* ============ ABOUT ============ */
+  .about .container {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 5rem;
+    align-items: center;
+  }
+  .about-image {
+    aspect-ratio: 4 / 5;
+    background:
+      linear-gradient(135deg, rgba(139, 90, 60, 0.15), rgba(79, 111, 82, 0.15)),
+      var(--cream-deep);
+    border: 1px solid var(--tan);
+    position: relative;
+    overflow: hidden;
+  }
+  .about-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .about p { color: var(--charcoal); font-size: 1.05rem; }
+  .about p + p { margin-top: 1.25rem; }
+  @media (max-width: 860px) {
+    .about .container { grid-template-columns: 1fr; gap: 2.5rem; }
+    .about-image { aspect-ratio: 4 / 3; max-height: 400px; }
+  }
+  /* ============ GALLERY ============ */
+  .gallery h2 { text-align: center; margin-bottom: 0.5rem; }
+  .gallery .lede {
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 3rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 220px;
+    gap: 1rem;
+  }
+  .photo {
+    background:
+      linear-gradient(135deg, rgba(139, 90, 60, 0.15), rgba(79, 111, 82, 0.15)),
+      var(--cream-deep);
+    border: 1px solid var(--tan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.4s ease;
+  }
+  .photo:not(:has(img))::after {
+    content: attr(data-label);
+    text-align: center;
+    padding: 0.5rem;
+  }
+  .photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s ease;
+  }
+  .photo:hover img { transform: scale(1.04); }
+  .photo.tall { grid-row: span 2; }
+  .photo.wide { grid-column: span 2; }
+  .photo.feature { grid-column: span 2; grid-row: span 2; }
+  @media (max-width: 860px) {
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 180px; }
+    .photo.feature { grid-column: span 2; }
+  }
+  /* ============ AMENITIES ============ */
+  .amenities .container { max-width: 1100px; }
+  .amenities h2 { text-align: center; margin-bottom: 3rem; }
+  .amen-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+  }
+  .amen-col h3 {
+    color: var(--wood-dark);
+    font-style: italic;
+    font-weight: 600;
+    border-bottom: 1px solid var(--tan);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .amen-col ul { list-style: none; }
+  .amen-col li {
+    padding: 0.4rem 0;
+    color: var(--charcoal);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .amen-col li::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    background: var(--wood);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  @media (max-width: 720px) {
+    .amen-grid { grid-template-columns: 1fr; gap: 2rem; }
+  }
+  /* ============ STORY / CREATIVE ANGLE ============ */
+  .story {
+    background: var(--charcoal);
+    color: var(--cream);
+    padding: 7rem 1.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .story::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(139, 90, 60, 0.18) 0%, transparent 50%),
+      radial-gradient(circle at 70% 80%, rgba(79, 111, 82, 0.15) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .story .container { position: relative; max-width: 750px; }
+  .story .section-eyebrow { color: var(--cream-warm); }
+  .story h2 {
+    color: var(--cream);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+  }
+  .story p {
+    font-size: 1.15rem;
+    color: var(--cream-warm);
+    line-height: 1.75;
+  }
+  .story-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-style: italic;
+    color: var(--cream);
+    border-left: 2px solid var(--wood);
+    padding-left: 1.5rem;
+    margin: 2.5rem auto 0;
+    max-width: 500px;
+    text-align: left;
+  }
+  /* ============ LOCATION ============ */
+  .location .container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: start;
+  }
+  .location-text p { color: var(--charcoal); font-size: 1.05rem; }
+  .nearby {
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .nearby-item {
+    border-top: 1px solid var(--tan);
+    padding-top: 0.75rem;
+  }
+  .nearby-item h4 {
+    font-size: 1.1rem;
+    color: var(--wood-dark);
+    margin-bottom: 0.25rem;
+  }
+  .nearby-item p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0;
+  }
+  .map-placeholder {
+    aspect-ratio: 4 / 5;
+    background:
+      linear-gradient(135deg, rgba(79, 111, 82, 0.2), rgba(139, 90, 60, 0.15)),
+      var(--cream-deep);
+    border: 1px solid var(--tan);
+    overflow: hidden;
+    position: relative;
+  }
+  .map-placeholder img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  @media (max-width: 860px) {
+    .location .container { grid-template-columns: 1fr; gap: 2.5rem; }
+    .map-placeholder { aspect-ratio: 4 / 3; }
+  }
+  /* ============ FAQ ============ */
+  .faq .container { max-width: 800px; }
+  .faq h2 { text-align: center; margin-bottom: 3rem; }
+  .faq-item {
+    border-bottom: 1px solid var(--tan);
+    padding: 1.25rem 0;
+  }
+  .faq-q {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    color: var(--charcoal);
+    font-weight: 500;
+  }
+  .faq-q::after {
+    content: '+';
+    font-size: 1.5rem;
+    color: var(--wood);
+    transition: transform 0.2s;
+  }
+  .faq-item.open .faq-q::after { transform: rotate(45deg); }
+  .faq-a {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    color: var(--charcoal);
+    font-size: 0.98rem;
+  }
+  .faq-item.open .faq-a {
+    max-height: 300px;
+    padding-top: 0.75rem;
+  }
+  /* ============ BOOKING ============ */
+  .book {
+    background: var(--cream-warm);
+    padding: 5rem 1.5rem;
+  }
+  .book .container { max-width: 900px; }
+  .book-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  .book h2 { font-style: italic; margin-bottom: 1rem; }
+  .book p { color: var(--muted); margin-bottom: 1rem; }
+  .booking-form {
+    background: var(--cream);
+    border: 1px solid var(--tan);
+    padding: 2rem;
+    border-radius: 4px;
+  }
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  .form-group label {
+    display: block;
+    font-weight: 500;
+    color: var(--charcoal);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+  .form-group input[type="text"],
+  .form-group input[type="email"],
+  .form-group input[type="date"],
+  .form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--tan);
+    border-radius: 2px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--charcoal);
+    background: var(--cream);
+  }
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--wood);
+    box-shadow: 0 0 0 2px rgba(139, 90, 60, 0.1);
+  }
+  .date-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .form-error {
+    color: var(--error);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: none;
+  }
+  .form-error.show { display: block; }
+  .pricing-info {
+    background: var(--cream-deep);
+    border: 1px solid var(--tan);
+    padding: 1.5rem;
+    border-radius: 2px;
+    margin-top: 1.5rem;
+  }
+  .pricing-info h3 {
+    font-size: 1rem;
+    color: var(--charcoal);
+    margin-bottom: 1rem;
+  }
+  .price-breakdown {
+    font-size: 0.9rem;
+    color: var(--charcoal);
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+  }
+  .price-breakdown.total {
+    border-top: 1px solid var(--tan);
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  .booking-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .booking-btn {
+    padding: 0.9rem 1.5rem;
+    border: none;
+    border-radius: 2px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .booking-btn.submit {
+    background: var(--charcoal);
+    color: var(--cream);
+  }
+  .booking-btn.submit:hover {
+    background: var(--wood-dark);
+  }
+  .booking-btn.copy {
+    background: var(--wood);
+    color: var(--cream);
+  }
+  .booking-btn.copy:hover {
+    background: var(--wood-dark);
+  }
+  .booking-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .success-message {
+    background: rgba(79, 111, 82, 0.1);
+    border: 1px solid var(--success);
+    color: var(--forest);
+    padding: 1rem;
+    border-radius: 2px;
+    margin-top: 1rem;
+    display: none;
+  }
+  .success-message.show { display: block; }
+  @media (max-width: 720px) {
+    .booking-form { padding: 1.5rem; }
+    .date-row { grid-template-columns: 1fr; }
+    .booking-actions { grid-template-columns: 1fr; }
+  }
+  /* ============ FOOTER ============ */
+  footer {
+    background: var(--ink);
+    color: var(--cream-warm);
+    padding: 3rem 1.5rem 2rem;
+    text-align: center;
+    font-size: 0.85rem;
+  }
+  footer .logo { color: var(--cream); font-size: 1.75rem; margin-bottom: 0.5rem; display: inline-block; }
+  footer p { color: var(--cream-deep); opacity: 0.7; margin: 0.25rem 0; }
+  footer .links { margin: 1.5rem 0; }
+  footer .links a { color: var(--cream-warm); margin: 0 1rem; opacity: 0.85; }
+  /* ============ UTILITIES ============ */
+  [data-uk] { display: none; }
+  body.lang-uk [data-en] { display: revert; }
+  body.lang-uk [data-uk] { display: none; }
+  .book-link {
+    background: var(--charcoal);
+    color: var(--cream) !important;
+    padding: 0.5rem 1.1rem;
+    border-radius: 2px;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .book-link:hover { background: var(--wood-dark); color: var(--cream) !important; }
+</style>
+</head>
+<body>
+<!-- ============ NAVIGATION ============ -->
+<nav class="top" id="topNav">
+  <div class="nav-inner">
+    <a href="#top" class="logo">Jazz <em>Xata</em></a>
+    <div class="nav-links">
+      <a href="#about" data-en="The cottage" data-uk="Хата">The cottage</a>
+      <a href="#gallery" data-en="Gallery" data-uk="Галерея">Gallery</a>
+      <a href="#location" data-en="Location" data-uk="Розташування">Location</a>
+      <a href="#book" class="book-link" data-en="Book" data-uk="Бронювати">Book</a>
+      <div class="lang-toggle">
+        <button class="active" onclick="setLang('en')">EN</button>
+        <button onclick="setLang('uk')">УК</button>
+      </div>
+    </div>
+  </div>
+</nav>
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="hero-content">
+    <div class="eyebrow" data-en="Yablunytsya · Ukrainian Carpathians" data-uk="Яблуниця · Українські Карпати">Yablunytsya · Ukrainian Carpathians</div>
+    <h1 data-en="A creative mountain retreat in the heart of the Carpathians"
+        data-uk="Творчий гірський прихисток у серці Карпат">
+      A creative mountain retreat in the heart of the Carpathians
+    </h1>
+    <p class="sub" data-en="A two-storey cottage tucked into the mountains in Yablunytsya, minutes from Bukovel and Dragobrat. Sleeps up to 5, with a fireplace, sauna, and a quiet creative spirit."
+                  data-uk="Двоповерхова хата в горах, у селі Яблуниця, неподалік від Буковеля та Драгобрата. Розрахована на 4–5 гостей, з каміном, сауною та особливим творчим духом.">
+      A two-storey cottage tucked into the mountains in Yablunytsya, minutes from Bukovel and Dragobrat. Sleeps up to 5, with a fireplace, sauna, and a quiet creative spirit.
+    </p>
+    <a href="#book" class="cta" data-en="Check availability" data-uk="Перевірити дати">Check availability</a>
+  </div>
+  <div class="scroll-cue" data-en="Scroll" data-uk="Гортайте">Scroll</div>
+</header>
+<!-- ============ ABOUT ============ -->
+<section class="about" id="about">
+  <div class="container">
+    <div class="about-image"><img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400&h=500&fit=crop" alt="Jazz Xata cottage exterior"></div>
+    <div>
+      <span class="section-eyebrow" data-en="The cottage" data-uk="Хата">The cottage</span>
+      <h2 data-en="Where the forest meets the open sky"
+          data-uk="Там, де ліс зустрічається з відкритим небом">
+        Where the forest meets the open sky
+      </h2>
+      <p data-en="High in the Ukrainian Carpathians, in the village of Yablunytsya, Jazz Xata is a two-storey wooden cottage with two terraces, two bedrooms, two bathrooms, a kitchenette, and a living room built around a stone fireplace — comfortable enough for four to five guests, quiet enough to actually rest."
+         data-uk="Високо в українських Карпатах, у селі Яблуниця, Jazz Хата — це двоповерховий дерев'яний будинок із двома терасами, двома спальнями, двома ванними кімнатами, кухнею та вітальнею з кам'яним каміном — достатньо просторий для чотирьох-п'яти гостей і достатньо тихий, щоб справді відпочити.">
+        High in the Ukrainian Carpathians, in the village of Yablunytsya, Jazz Xata is a two-storey wooden cottage with two terraces, two bedrooms, two bathrooms, a kitchenette, and a living room built around a stone fireplace — comfortable enough for four to five guests, quiet enough to actually rest.
+      </p>
+      <p data-en="After a day in the mountains, the sauna is ready. Dinner can be made in the fully equipped kitchen or ordered in. The barbecue and gazebo in the courtyard are perfect for long summer evenings. It's the Carpathians the way they should be experienced — slow, warm, and lived in."
+         data-uk="Після дня в горах на вас чекає сауна. Вечерю можна приготувати в повністю обладнаній кухні або замовити. У дворі — мангал і альтанка для довгих літніх вечорів. Це Карпати такими, якими їх варто пізнавати — повільно, тепло, по-домашньому.">
+        After a day in the mountains, the sauna is ready. Dinner can be made in the fully equipped kitchen or ordered in. The barbecue and gazebo in the courtyard are perfect for long summer evenings. It's the Carpathians the way they should be experienced — slow, warm, and lived in.
+      </p>
+    </div>
+  </div>
+</section>
+<!-- ============ STORY (CREATIVE ANGLE) ============ -->
+<section class="story">
+  <div class="container">
+    <span class="section-eyebrow" data-en="What makes Jazz Xata different" data-uk="Чим відрізняється Jazz Хата">What makes Jazz Xata different</span>
+    <h2 data-en="Music, books, and a warm fire"
+        data-uk="Музика, книги і тепле вогнище">
+      Music, books, and a warm fire
+    </h2>
+    <p data-en="Most rentals give you a place to sleep. Jazz Xata gives you a place to do something. Musical instruments wait to be played, the bookshelves are stocked, and there are sketchbooks and art supplies for anyone who feels inspired."
+       data-uk="Більшість оренд дають вам місце для сну. Jazz Хата дає вам місце, щоб щось творити. Тут чекають музичні інструменти, повні полиці книжок, скетчбуки й матеріали для малювання — для всіх, кому захочеться надихнутись.">
+      Most rentals give you a place to sleep. Jazz Xata gives you a place to do something. Musical instruments wait to be played, the bookshelves are stocked, and there are sketchbooks and art supplies for anyone who feels inspired.
+    </p>
+    <div class="story-quote" data-en="Guests come for the skiing and hiking, and often stay an extra day to read by the fire or write at the kitchen table."
+                              data-uk="Гості приїжджають заради лиж і гір, а потім часто залишаються ще на один день — почитати біля каміна або щось записати на кухні.">
+      Guests come for the skiing and hiking, and often stay an extra day to read by the fire or write at the kitchen table.
+    </div>
+  </div>
+</section>
+<!-- ============ GALLERY ============ -->
+<section class="gallery alt-bg" id="gallery">
+  <div class="container">
+    <span class="section-eyebrow" data-en="Gallery" data-uk="Галерея" style="text-align:center;display:block">Gallery</span>
+    <h2 data-en="Inside Jazz Xata" data-uk="Всередині Jazz Хати">Inside Jazz Xata</h2>
+    <p class="lede" data-en="Wood-clad walls, a fire in the hearth, and mountains framed in every window."
+                    data-uk="Стіни з дерева, вогонь у каміні та гори в кожному вікні.">
+      Wood-clad walls, a fire in the hearth, and mountains framed in every window.
+    </p>
+    <div class="gallery-grid">
+      <div class="photo feature"><img src="https://images.unsplash.com/photo-1545917503-d2dbc8181498?w=600&h=600&fit=crop" alt="Jazz Xata"></div>
+      <div class="photo"><img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop" alt="Jazz Xata"></div>
+      <div class="photo tall"><img src="https://images.unsplash.com/photo-1522780353892-6fde11c1de34?w=400&h=600&fit=crop" alt="Jazz Xata"></div>
+      <div class="photo"><img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=400&fit=crop" alt="Jazz Xata"></div>
+      <div class="photo wide"><img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&h=400&fit=crop" alt="Jazz Xata"></div>
+      <div class="photo"><img src="https://images.unsplash.com/photo-1616395573518-bda161ef66b4?w=400&h=400&fit=crop" alt="Jazz Xata"></div>
+      <div class="photo"><img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=400&fit=crop" alt="Jazz Xata"></div>
+      <div class="photo wide"><img src="https://images.unsplash.com/photo-1571508601633-b9a37dfaef05?w=600&h=400&fit=crop" alt="Jazz Xata"></div>
+      <div class="photo"><img src="https://images.unsplash.com/photo-1521557537228-e6f81766d292?w=400&h=400&fit=crop" alt="Jazz Xata"></div>
+      <div class="photo"><img src="https://images.unsplash.com/photo-1594622592292-b8324b92b6ba?w=400&h=400&fit=crop" alt="Jazz Xata"></div>
+      <div class="photo tall"><img src="https://images.unsplash.com/photo-1505932247050-fcf85b22eb11?w=400&h=600&fit=crop" alt="Jazz Xata"></div>
+      <div class="photo"><img src="https://images.unsplash.com/photo-1505932247050-fcf85b22eb11?w=400&h=400&fit=crop" alt="Jazz Xata"></div>
+      <div class="photo"><img src="https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=400&h=400&fit=crop" alt="Jazz Xata"></div>
+      <div class="photo"><img src="https://images.unsplash.com/photo-1600973565119-5e0ee5b8e1d7?w=400&h=400&fit=crop" alt="Jazz Xata"></div>
+      <div class="photo"><img src="https://images.unsplash.com/photo-1615529162924-f2a9e33574e4?w=400&h=400&fit=crop" alt="Jazz Xata"></div>
+    </div>
+  </div>
+</section>
+<!-- ============ AMENITIES ============ -->
+<section class="amenities">
+  <div class="container">
+    <span class="section-eyebrow" data-en="Amenities" data-uk="Зручності" style="text-align:center;display:block">Amenities</span>
+    <h2 data-en="Everything you need, nothing you don't"
+        data-uk="Все, що потрібно, і нічого зайвого">
+      Everything you need, nothing you don't
+    </h2>
+    <div class="amen-grid">
+      <div class="amen-col">
+        <h3 data-en="Indoors" data-uk="У будинку">Indoors</h3>
+        <ul>
+          <li data-en="Living room with stone fireplace" data-uk="Вітальня з кам'яним каміном">Living room with stone fireplace</li>
+          <li data-en="2 bedrooms · sleeps 4–5" data-uk="2 спальні · 4–5 гостей">2 bedrooms · sleeps 4–5</li>
+          <li data-en="2 bathrooms" data-uk="2 ванні кімнати">2 bathrooms</li>
+          <li data-en="Fully equipped kitchen" data-uk="Повністю обладнана кухня">Fully equipped kitchen</li>
+          <li data-en="Wi-Fi · TV" data-uk="Wi-Fi · телевізор">Wi-Fi · TV</li>
+          <li data-en="Washing machine · iron" data-uk="Пральна машина · праска">Washing machine · iron</li>
+          <li data-en="Musical instruments" data-uk="Музичні інструменти">Musical instruments</li>
+          <li data-en="Library" data-uk="Бібліотека">Library</li>
+          <li data-en="Art &amp; drawing supplies" data-uk="Матеріали для малювання">Art &amp; drawing supplies</li>
+        </ul>
+      </div>
+      <div class="amen-col">
+        <h3 data-en="Outdoors" data-uk="Надворі">Outdoors</h3>
+        <ul>
+          <li data-en="2 terraces with mountain views" data-uk="2 тераси з видом на гори">2 terraces with mountain views</li>
+          <li data-en="Barbecue area" data-uk="Місце для барбекю">Barbecue area</li>
+          <li data-en="Gazebo" data-uk="Альтанка">Gazebo</li>
+          <li data-en="Free yard parking" data-uk="Безкоштовна парковка на подвір'ї">Free yard parking</li>
+          <li data-en="Additional parking 250m away" data-uk="Додаткова парковка за 250 м">Additional parking 250m away</li>
+        </ul>
+      </div>
+      <div class="amen-col">
+        <h3 data-en="Services" data-uk="Послуги">Services</h3>
+        <ul>
+          <li data-en="Sauna" data-uk="Сауна">Sauna</li>
+          <li data-en="Optional dinner service" data-uk="Замовлення вечері">Optional dinner service</li>
+          <li data-en="Transfers to mountain trails" data-uk="Трансфер до гірських стежок">Transfers to mountain trails</li>
+          <li data-en="Transfers to ski lifts" data-uk="Трансфер до підйомників">Transfers to ski lifts</li>
+          <li data-en="Custom road trips" data-uk="Індивідуальні мандрівки">Custom road trips</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ============ LOCATION ============ -->
+<section class="location alt-bg" id="location">
+  <div class="container">
+    <div class="location-text">
+      <span class="section-eyebrow" data-en="Location" data-uk="Розташування">Location</span>
+      <h2 data-en="One of the best-positioned villages in the Carpathians"
+          data-uk="Одне з найкраще розташованих сіл у Карпатах">
+        One of the best-positioned villages in the Carpathians
+      </h2>
+      <p data-en="Yablunytsya is a small mountain village in the Ivano-Frankivsk region. Surrounded by Ukraine's most iconic peaks and ski resorts, with quiet forest trails just outside the door."
+         data-uk="Яблуниця — невелике гірське село на Івано-Франківщині. Оточене найвідомішими вершинами і курортами України, з тихими лісовими стежками просто за порогом.">
+        Yablunytsya is a small mountain village in the Ivano-Frankivsk region. Surrounded by Ukraine's most iconic peaks and ski resorts, with quiet forest trails just outside the door.
+      </p>
+      <div class="nearby">
+        <div class="nearby-item">
+          <h4>Bukovel</h4>
+          <p data-en="Ukraine's largest ski resort · short drive" data-uk="Найбільший курорт України · кілька хв їзди">Ukraine's largest ski resort · short drive</p>
+        </div>
+        <div class="nearby-item">
+          <h4>Dragobrat</h4>
+          <p data-en="High-altitude wilder skiing" data-uk="Висотний дикіший курорт">High-altitude wilder skiing</p>
+        </div>
+        <div class="nearby-item">
+          <h4 data-en="Hoverla" data-uk="Говерла">Hoverla</h4>
+          <p data-en="Ukraine's highest peak" data-uk="Найвища вершина України">Ukraine's highest peak</p>
+        </div>
+        <div class="nearby-item">
+          <h4 data-en="Petros · Khomyak · Pip Ivan" data-uk="Петрос · Хом'як · Піп Іван">Petros · Khomyak · Pip Ivan</h4>
+          <p data-en="Classic Carpathian summits" data-uk="Класичні карпатські вершини">Classic Carpathian summits</p>
+        </div>
+      </div>
+    </div>
+    <div class="map-placeholder"><img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=750&fit=crop" alt="The Carpathian surroundings near Jazz Xata"></div>
+  </div>
+</section>
+<!-- ============ FAQ ============ -->
+<section class="faq">
+  <div class="container">
+    <span class="section-eyebrow" data-en="FAQ" data-uk="Поширені запитання" style="text-align:center;display:block">FAQ</span>
+    <h2 data-en="Good to know" data-uk="Важливо знати">Good to know</h2>
+    <div class="faq-item">
+      <div class="faq-q" data-en="How many people does Jazz Xata sleep?" data-uk="Скільки гостей може розміститись?">How many people does Jazz Xata sleep?</div>
+      <div class="faq-a" data-en="Comfortably 4, with space for a 5th guest." data-uk="Комфортно — 4, з можливістю розмістити 5-го гостя.">Comfortably 4, with space for a 5th guest.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" data-en="Is the cottage suitable for winter?" data-uk="Чи підходить хата взимку?">Is the cottage suitable for winter?</div>
+      <div class="faq-a" data-en="Yes — the fireplace and sauna make it ideal in winter. Plan to arrive in a 4WD vehicle, or use the lower parking and we'll help you up." data-uk="Так — камін і сауна роблять її ідеальною взимку. Краще приїздити повним приводом, або залишити авто на нижній парковці, і ми допоможемо.">Yes — the fireplace and sauna make it ideal in winter. Plan to arrive in a 4WD vehicle, or use the lower parking and we'll help you up.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" data-en="Can we order food?" data-uk="Чи можна замовити їжу?">Can we order food?</div>
+      <div class="faq-a" data-en="Yes. The kitchen is fully equipped, but dinner can also be ordered in." data-uk="Так. Кухня повністю обладнана, але можна замовити вечерю.">Yes. The kitchen is fully equipped, but dinner can also be ordered in.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" data-en="Can the host take us to the trails or ski lifts?" data-uk="Чи возить господар до стежок і підйомників?">Can the host take us to the trails or ski lifts?</div>
+      <div class="faq-a" data-en="Yes — transfers to Hoverla, Petros, Khomyak, Pip Ivan, Bukovel, and Dragobrat can be arranged." data-uk="Так — можна організувати трансфер до Говерли, Петроса, Хом'яка, Піп Івана, Буковеля та Драгобрата.">Yes — transfers to Hoverla, Petros, Khomyak, Pip Ivan, Bukovel, and Dragobrat can be arranged.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" data-en="Is there Wi-Fi?" data-uk="Чи є Wi-Fi?">Is there Wi-Fi?</div>
+      <div class="faq-a" data-en="Yes, throughout the cottage." data-uk="Так, по всій хаті.">Yes, throughout the cottage.</div>
+    </div>
+  </div>
+</section>
+<!-- ============ BOOKING ============ -->
+<section class="book" id="book">
+  <div class="container">
+    <div class="book-header">
+      <span class="section-eyebrow" data-en="Book your stay" data-uk="Бронюйте">Book your stay</span>
+      <h2 data-en="Come stay with us" data-uk="Приїжджайте до нас">Come stay with us</h2>
+      <p data-en="Pick your dates and we'll handle the rest. Secure direct bookings with instant confirmation."
+         data-uk="Виберіть дати — ми про все подбаємо. Безпечне бронювання з миттєвим підтвердженням.">
+        Pick your dates and we'll handle the rest. Secure direct bookings with instant confirmation.
+      </p>
+    </div>
+    <form class="booking-form" id="bookingForm">
+      <!-- Step 1: Select Dates -->
+      <div id="step1" class="booking-step">
+        <h3 data-en="Step 1: Select your dates" data-uk="Крок 1: Виберіть дати">Step 1: Select your dates</h3>
+        <p style="color: var(--muted); margin-bottom: 1.5rem;" data-en="Click on dates to select check-in and check-out. Grayed out dates are unavailable." data-uk="Натисніть на дати, щоб вибрати заселення та виселення. Сірі дати недоступні.">Click on dates to select check-in and check-out. Grayed out dates are unavailable.</p>
+
+        <div id="calendarContainer" style="margin-bottom: 2rem;"></div>
+
+        <div class="form-group">
+          <label data-en="Selected dates" data-uk="Вибрані дати">Selected dates</label>
+          <div class="date-row">
+            <div>
+              <label style="font-size: 0.85rem; font-weight: 400;" data-en="Check-in" data-uk="Заселення">Check-in</label>
+              <input type="text" id="selectedCheckIn" readonly style="background: var(--cream-deep);">
+            </div>
+            <div>
+              <label style="font-size: 0.85rem; font-weight: 400;" data-en="Check-out" data-uk="Виселення">Check-out</label>
+              <input type="text" id="selectedCheckOut" readonly style="background: var(--cream-deep);">
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="booking-btn submit" id="continueToStep2" disabled data-en="Continue" data-uk="Далі">Continue</button>
+      </div>
+
+      <!-- Step 2: Guest Details & Payment -->
+      <div id="step2" class="booking-step" style="display: none;">
+        <h3 data-en="Step 2: Your details & payment" data-uk="Крок 2: Ваші дані та платіж">Step 2: Your details & payment</h3>
+
+        <!-- Guest name -->
+        <div class="form-group">
+          <label for="guestName" data-en="Full name" data-uk="Повне ім'я">Full name</label>
+          <input type="text" id="guestName" name="guestName" required>
+          <div class="form-error" id="guestNameError" data-en="Please enter your name" data-uk="Будь ласка, введіть ім'я">Please enter your name</div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="guestEmail" data-en="Email" data-uk="Електронна пошта">Email</label>
+          <input type="email" id="guestEmail" name="guestEmail" required>
+          <div class="form-error" id="guestEmailError" data-en="Please enter a valid email" data-uk="Будь ласка, введіть коректну електронну пошту">Please enter a valid email</div>
+        </div>
+
+        <!-- Number of guests -->
+        <div class="form-group">
+          <label for="numGuests" data-en="Number of guests" data-uk="Кількість гостей">Number of guests</label>
+          <select id="numGuests" name="numGuests" required>
+            <option value="">-- Select --</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+        </div>
+
+        <!-- Phone (optional) -->
+        <div class="form-group">
+          <label for="guestPhone" data-en="Phone (optional)" data-uk="Телефон (опціонально)">Phone (optional)</label>
+          <input type="text" id="guestPhone" name="guestPhone" placeholder="+38...">
+        </div>
+
+        <!-- Special requests (optional) -->
+        <div class="form-group">
+          <label for="specialRequests" data-en="Special requests (optional)" data-uk="Спеціальні побажання (опціонально)">Special requests (optional)</label>
+          <textarea id="specialRequests" name="specialRequests" style="width: 100%; padding: 0.75rem; border: 1px solid var(--tan); border-radius: 2px; font-family: inherit; font-size: 0.95rem; color: var(--charcoal); background: var(--cream); resize: vertical; min-height: 80px;" placeholder="Dinner service, transfers, etc."></textarea>
+        </div>
+
+        <!-- Pricing info -->
+        <div class="pricing-info">
+          <h3 data-en="Price breakdown" data-uk="Розбиття вартості">Price breakdown</h3>
+          <div id="priceBreakdownDetails"></div>
+          <div class="price-breakdown total">
+            <span data-en="Total" data-uk="Всього">Total</span>
+            <span id="totalPrice">€0</span>
+          </div>
+        </div>
+
+        <!-- Stripe Payment Element -->
+        <div class="form-group" style="margin-top: 2rem;">
+          <label data-en="Payment information" data-uk="Інформація про платіж">Payment information</label>
+          <div id="payment-element" style="margin-top: 1rem;"></div>
+          <div id="payment-message" class="form-error" style="display: none;"></div>
+        </div>
+
+        <!-- Submit button -->
+        <div class="booking-actions" style="margin-top: 2rem;">
+          <button type="button" class="booking-btn submit" style="background: var(--muted);" id="backToStep1" data-en="Back" data-uk="Назад">Back</button>
+          <button type="submit" class="booking-btn submit" id="submitBtn" data-en="Complete booking" data-uk="Завершити бронювання">Complete booking</button>
+        </div>
+      </div>
+
+      <!-- Success message -->
+      <div class="success-message" id="successMessage" style="display: none;">
+        <strong data-en="Booking confirmed!" data-uk="Бронювання підтверджено!">Booking confirmed!</strong>
+        <p data-en="Check your email for confirmation details." data-uk="Перевірте вашу електронну пошту для деталей підтвердження.">Check your email for confirmation details.</p>
+      </div>
+
+      <!-- Error message -->
+      <div id="errorMessage" class="form-error" style="display: none; margin-top: 1rem;"></div>
+
+      <!-- Loading indicator -->
+      <div id="loadingIndicator" style="display: none; text-align: center; padding: 1rem; color: var(--muted);">
+        <p data-en="Processing your booking..." data-uk="Обробляємо ваше бронювання...">Processing your booking...</p>
+      </div>
+    </form>
+  </div>
+</section>
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="logo">Jazz <em>Xata</em></div>
+  <p data-en="Yablunytsya, Ukrainian Carpathians" data-uk="Яблуниця, Українські Карпати">Yablunytsya, Ukrainian Carpathians</p>
+  <div class="links">
+    <a href="#about" data-en="The cottage" data-uk="Хата">The cottage</a>
+    <a href="#gallery" data-en="Gallery" data-uk="Галерея">Gallery</a>
+    <a href="#location" data-en="Location" data-uk="Розташування">Location</a>
+    <a href="#book" data-en="Book" data-uk="Бронювати">Book</a>
+  </div>
+  <p>© Jazz Xata · <span data-en="Made with care in the Carpathians" data-uk="Зроблено з любов'ю в Карпатах">Made with care in the Carpathians</span></p>
+</footer>
+
+<script>
+  // ============ CONFIGURATION ============
+  const API_BASE = process.env.NODE_ENV === 'production' ? 'https://your-vercel-url.vercel.app/api' : 'http://localhost:3001/api';
+  const STRIPE_PUBLISHABLE_KEY = 'pk_test_YOUR_STRIPE_KEY'; // Replace with actual key
+
+  const pricingSeasons = [
+    { months: [11, 12, 1, 2, 3], pricePerNight: 80 },   // Low
+    { months: [4, 10], pricePerNight: 120 },             // Mid
+    { months: [5, 6, 7, 8, 9], pricePerNight: 180 }     // High
+  ];
+
+  const MIN_STAY = 2;
+  let stripe, elements, paymentElement;
+  let selectedCheckIn, selectedCheckOut;
+  let currentBookingId, currentPaymentIntentId;
+  let unavailableDates = [];
+
+  // ============ INITIALIZATION ============
+  async function initStripe() {
+    stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+  }
+
+  async function initializeApp() {
+    initStripe();
+    generateCalendar();
+    await loadUnavailableDates();
+    setupEventListeners();
+  }
+
+  // ============ CALENDAR FUNCTIONALITY ============
+  function generateCalendar() {
+    const today = new Date();
+    const nextYear = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
+    const container = document.getElementById('calendarContainer');
+    container.innerHTML = '';
+
+    for (let d = new Date(today); d <= nextYear; d.setMonth(d.getMonth() + 1)) {
+      const monthYear = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      const monthDiv = document.createElement('div');
+      monthDiv.style.marginBottom = '2rem';
+
+      let html = `<h4 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--charcoal);">${monthYear}</h4>`;
+      html += '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem;">';
+
+      const firstDay = new Date(d.getFullYear(), d.getMonth(), 1);
+      const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+
+      // Day headers
+      const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      dayHeaders.forEach(day => {
+        html += `<div style="text-align: center; font-size: 0.75rem; font-weight: 600; color: var(--muted); padding: 0.25rem;">${day}</div>`;
+      });
+
+      // Empty cells for days before month starts
+      for (let i = 0; i < firstDay.getDay(); i++) {
+        html += '<div></div>';
+      }
+
+      // Days of month
+      for (let day = 1; day <= lastDay.getDate(); day++) {
+        const date = new Date(d.getFullYear(), d.getMonth(), day);
+        const dateStr = date.toISOString().split('T')[0];
+        const isPast = date < today;
+        const isUnavailable = unavailableDates.includes(dateStr);
+        const isSelected = (dateStr === selectedCheckIn) || (dateStr === selectedCheckOut);
+        const isInRange = selectedCheckIn && selectedCheckOut && dateStr > selectedCheckIn && dateStr < selectedCheckOut;
+
+        let style = 'padding: 0.75rem; text-align: center; cursor: pointer; border: 1px solid var(--tan); border-radius: 2px; font-size: 0.85rem; ';
+
+        if (isPast) {
+          style += 'background: #f0f0f0; color: #ccc; cursor: not-allowed;';
+        } else if (isUnavailable) {
+          style += 'background: #ffebee; color: #c44545; cursor: not-allowed;';
+        } else if (isSelected) {
+          style += 'background: var(--wood); color: var(--cream);';
+        } else if (isInRange) {
+          style += 'background: rgba(139, 90, 60, 0.2); color: var(--charcoal);';
+        } else {
+          style += 'background: var(--cream); color: var(--charcoal); hover: background-color: var(--cream-warm);';
+        }
+
+        const onclick = (!isPast && !isUnavailable) ? `selectDate('${dateStr}')` : '';
+        html += `<div style="${style}" onclick="${onclick}">${day}</div>`;
+      }
+
+      html += '</div>';
+      monthDiv.innerHTML = html;
+      container.appendChild(monthDiv);
+    }
+  }
+
+  async function loadUnavailableDates() {
+    try {
+      const response = await fetch(`${API_BASE}/availability`);
+      if (response.ok) {
+        const data = await response.json();
+        unavailableDates = data.unavailableDates || [];
+        generateCalendar();
+      }
+    } catch (error) {
+      console.error('Error loading availability:', error);
+    }
+  }
+
+  function selectDate(dateStr) {
+    if (!selectedCheckIn || (selectedCheckIn && selectedCheckOut)) {
+      selectedCheckIn = dateStr;
+      selectedCheckOut = null;
+    } else if (dateStr > selectedCheckIn) {
+      selectedCheckOut = dateStr;
+    } else {
+      selectedCheckIn = dateStr;
+      selectedCheckOut = null;
+    }
+
+    updateSelectedDates();
+    generateCalendar();
+  }
+
+  function updateSelectedDates() {
+    const checkInEl = document.getElementById('selectedCheckIn');
+    const checkOutEl = document.getElementById('selectedCheckOut');
+    const continueBtn = document.getElementById('continueToStep2');
+
+    if (selectedCheckIn) {
+      checkInEl.value = new Date(selectedCheckIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } else {
+      checkInEl.value = '';
+    }
+
+    if (selectedCheckOut) {
+      checkOutEl.value = new Date(selectedCheckOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      continueBtn.disabled = false;
+    } else {
+      checkOutEl.value = '';
+      continueBtn.disabled = true;
+    }
+  }
+
+  // ============ FORM NAVIGATION ============
+  document.getElementById('continueToStep2').addEventListener('click', async () => {
+    if (!selectedCheckIn || !selectedCheckOut) return;
+
+    const checkInDate = new Date(selectedCheckIn);
+    const checkOutDate = new Date(selectedCheckOut);
+    const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+
+    if (nights < MIN_STAY) {
+      alert(`Minimum ${MIN_STAY} nights required`);
+      return;
+    }
+
+    // Calculate price
+    let totalPrice = 0;
+    let currentDate = new Date(checkInDate);
+    const breakdownItems = [];
+
+    while (currentDate < checkOutDate) {
+      const month = currentDate.getMonth() + 1;
+      const season = pricingSeasons.find(s => s.months.includes(month)) || pricingSeasons[0];
+      const dateStr = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+      breakdownItems.push({
+        date: dateStr,
+        price: season.pricePerNight
+      });
+
+      totalPrice += season.pricePerNight;
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // Update breakdown
+    const breakdownEl = document.getElementById('priceBreakdownDetails');
+    breakdownEl.innerHTML = breakdownItems.map(item => `
+      <div class="price-breakdown">
+        <span>${item.date}</span>
+        <span>€${item.price}</span>
+      </div>
+    `).join('');
+    document.getElementById('totalPrice').textContent = `€${totalPrice}`;
+
+    // Initialize Stripe payment element
+    const clientSecret = await initiateBooking(totalPrice);
+    if (clientSecret) {
+      elements = stripe.elements({ clientSecret });
+      paymentElement = elements.create('payment');
+      paymentElement.mount('#payment-element');
+
+      // Show step 2
+      document.getElementById('step1').style.display = 'none';
+      document.getElementById('step2').style.display = 'block';
+    }
+  });
+
+  document.getElementById('backToStep1').addEventListener('click', () => {
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('step2').style.display = 'none';
+  });
+
+  // ============ BOOKING SUBMISSION ============
+  async function initiateBooking(totalPrice) {
+    try {
+      const response = await fetch(`${API_BASE}/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          guestName: document.getElementById('guestName').value,
+          guestEmail: document.getElementById('guestEmail').value,
+          guestPhone: document.getElementById('guestPhone').value,
+          checkIn: selectedCheckIn,
+          checkOut: selectedCheckOut,
+          numGuests: document.getElementById('numGuests').value,
+          specialRequests: document.getElementById('specialRequests').value
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        currentBookingId = data.bookingId;
+        currentPaymentIntentId = data.clientSecret.split('_secret_')[0];
+        return data.clientSecret;
+      }
+    } catch (error) {
+      console.error('Booking initiation error:', error);
+      showError('Failed to initiate booking');
+    }
+  }
+
+  document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const guestName = document.getElementById('guestName').value.trim();
+    const guestEmail = document.getElementById('guestEmail').value.trim();
+
+    if (!guestName || !guestEmail) {
+      showError('Please fill in all required fields');
+      return;
+    }
+
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('loadingIndicator').style.display = 'block';
+
+    try {
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: window.location.origin + '?booking=success'
+        }
+      });
+
+      if (error) {
+        showError(error.message);
+      }
+    } catch (error) {
+      showError('Payment failed: ' + error.message);
+    } finally {
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('loadingIndicator').style.display = 'none';
+    }
+  });
+
+  // ============ HELPERS ============
+  function showError(message) {
+    const errorEl = document.getElementById('errorMessage');
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+  }
+
+  function setLang(lang) {
+    document.body.classList.toggle('lang-uk', lang === 'uk');
+    document.documentElement.lang = lang === 'uk' ? 'uk' : 'en';
+    document.querySelectorAll('.lang-toggle button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.lang-toggle button')[lang === 'uk' ? 1 : 0].classList.add('active');
+  }
+
+  // ============ STICKY NAV & FAQ ============
+  const nav = document.getElementById('topNav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.querySelector('.faq-q').addEventListener('click', () => {
+      item.classList.toggle('open');
+    });
+  });
+
+  function setupEventListeners() {
+    // All event listeners setup
+  }
+
+  // Initialize on page load
+  window.addEventListener('DOMContentLoaded', initializeApp);
+</script>
+</body>
+</html>
