@@ -14,6 +14,18 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Ensure MongoDB is connected before processing API requests
+app.use(async (req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    if (mongoose.connection.readyState !== 1) {
+      console.log('⏳ MongoDB not ready, attempting to connect...');
+      await connectDB();
+    }
+  }
+  next();
+});
+
 app.use(express.static(__dirname));
 
 // Serve index.html for root path
@@ -30,15 +42,48 @@ app.get('/admin.html', (req, res) => {
 const stripeClient = stripe(process.env.STRIPE_SECRET_KEY);
 
 // Initialize MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/jazz_xata';
+const MONGODB_URI = process.env.MONGODB_URI;
 
-mongoose.connect(MONGODB_URI, {
+if (!MONGODB_URI) {
+  console.error('❌ MONGODB_URI environment variable is not set!');
+  console.error('Available env vars:', Object.keys(process.env).filter(k => k.includes('MONGO') || k.includes('DB')));
+} else {
+  console.log('✅ MONGODB_URI is set:', MONGODB_URI.substring(0, 50) + '...');
+}
+
+// Connection options optimized for Vercel
+const mongooseOptions = {
   useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => {
-  console.log('Connected to MongoDB');
-}).catch((err) => {
-  console.error('MongoDB connection error:', err);
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  maxPoolSize: 10,
+  minPoolSize: 2,
+};
+
+// Connect with retry logic
+async function connectDB() {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      console.log('ℹ️ Already connected to MongoDB');
+      return;
+    }
+
+    await mongoose.connect(MONGODB_URI, mongooseOptions);
+    console.log('✅ Connected to MongoDB successfully');
+  } catch (err) {
+    console.error('❌ MongoDB connection error:', err.message);
+    // Don't throw - let requests handle it
+  }
+}
+
+// Try to connect on startup
+connectDB();
+
+// Reconnect on disconnect
+mongoose.connection.on('disconnected', () => {
+  console.log('⚠️ MongoDB disconnected, reconnecting...');
+  connectDB();
 });
 
 // Define Mongoose Schemas
