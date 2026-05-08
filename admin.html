@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jazz Xata — Admin Panel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    /* Login Page */
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #6B4426 0%, #4F6F52 100%);
+    }
+    .login-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
+    }
+    .login-box h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      color: #1C1A17;
+    }
+    .login-box p {
+      color: #666;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+    input[type="password"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #6B4426;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover {
+      background: #4F6F52;
+    }
+    .error-message {
+      color: #C44545;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Admin Dashboard */
+    .admin-container {
+      display: none;
+    }
+    .admin-header {
+      background: white;
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .admin-header h1 {
+      font-size: 1.5rem;
+      color: #1C1A17;
+    }
+    .logout-btn {
+      padding: 0.5rem 1rem;
+      background: #C44545;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .admin-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .card h2 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: #1C1A17;
+      border-bottom: 2px solid #6B4426;
+      padding-bottom: 0.5rem;
+    }
+
+    /* Bookings List */
+    .bookings-list {
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    .booking-item {
+      background: #f9f9f9;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid #6B4426;
+      border-radius: 4px;
+    }
+    .booking-item.confirmed {
+      border-left-color: #4F6F52;
+    }
+    .booking-item.pending {
+      border-left-color: #D9CDB8;
+    }
+    .booking-item.cancelled {
+      border-left-color: #C44545;
+    }
+
+    .booking-name {
+      font-weight: 600;
+      color: #1C1A17;
+      margin-bottom: 0.3rem;
+    }
+    .booking-dates {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+    }
+    .booking-email {
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 0.3rem;
+    }
+    .booking-status {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+    .status-confirmed {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status-cancelled {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    /* Calendar */
+    .calendar-wrapper {
+      display: flex;
+      flex-direction: column;
+    }
+    .month-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .month-nav button {
+      padding: 0.5rem 1rem;
+      width: auto;
+    }
+    .month-nav h3 {
+      font-size: 1.1rem;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+    }
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+    }
+    .calendar-day.other-month {
+      color: #ccc;
+    }
+    .calendar-day.today {
+      background: #D9CDB8;
+      font-weight: 600;
+    }
+    .calendar-day.blocked {
+      background: #C44545;
+      color: white;
+      font-weight: 600;
+    }
+    .calendar-day.booked {
+      background: #D4EDDA;
+      color: #155724;
+      font-weight: 600;
+    }
+    .calendar-day:hover {
+      background: #6B4426;
+      color: white;
+    }
+
+    .day-names {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .date-input-group {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e0e0e0;
+    }
+    .date-input-group input {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+    .date-input-group button {
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .admin-content {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Page -->
+  <div class="login-container" id="loginPage">
+    <div class="login-box">
+      <h1>Jazz Xata Admin</h1>
+      <p>Enter your password to access the admin panel</p>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password">
+      </div>
+      <button onclick="handleLogin()">Login</button>
+      <div id="loginError" class="error-message"></div>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard -->
+  <div class="admin-container" id="adminPanel">
+    <div class="admin-header">
+      <h1>Jazz Xata Admin Panel</h1>
+      <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </div>
+
+    <div class="admin-content">
+      <!-- Bookings Section -->
+      <div class="card">
+        <h2>Bookings</h2>
+        <div class="bookings-list" id="bookingsList">
+          <p style="color: #999;">Loading bookings...</p>
+        </div>
+      </div>
+
+      <!-- Calendar Section -->
+      <div class="card">
+        <h2>Block Dates</h2>
+        <div class="calendar-wrapper">
+          <div class="month-nav">
+            <button onclick="previousMonth()">← Previous</button>
+            <h3 id="monthYear"></h3>
+            <button onclick="nextMonth()">Next →</button>
+          </div>
+          <div class="day-names">
+            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+          </div>
+          <div class="calendar" id="calendar"></div>
+          <div class="date-input-group">
+            <input type="date" id="dateInput" placeholder="Or enter date manually">
+            <button onclick="toggleDateBlock()">Block/Unblock Date</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = '/api';
+    let adminToken = localStorage.getItem('adminToken');
+    let currentMonth = new Date();
+    let blockedDates = [];
+    let bookings = [];
+
+    // Check if already logged in
+    if (adminToken) {
+      showAdminPanel();
+    }
+
+    async function handleLogin() {
+      const password = document.getElementById('password').value;
+      const errorDiv = document.getElementById('loginError');
+      errorDiv.textContent = '';
+
+      if (!password) {
+        errorDiv.textContent = 'Please enter a password';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/admin/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          adminToken = data.token;
+          localStorage.setItem('adminToken', adminToken);
+          showAdminPanel();
+        } else {
+          errorDiv.textContent = 'Invalid password';
+        }
+      } catch (error) {
+        errorDiv.textContent = 'Login failed: ' + error.message;
+      }
+    }
+
+    function showAdminPanel() {
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      loadBookings();
+      loadBlockedDates();
+      renderCalendar();
+    }
+
+    async function loadBookings() {
+      try {
+        const response = await fetch(`${API_BASE}/bookings`, {
+          headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+        if (response.ok) {
+          bookings = await response.json();
+          renderBookings();
+        }
+      } catch (error) {
+        console.error('Failed to load bookings:', error);
+      }
+    }
+
+    function renderBookings() {
+      const container = document.getElementById('bookingsList');
+      if (bookings.length === 0) {
+        container.innerHTML = '<p style="color: #999;">No bookings yet</p>';
+        return;
+      }
+
+      container.innerHTML = bookings.map(b => `
+        <div class="booking-item ${b.status}">
+          <div class="booking-name">${b.guestName}</div>
+          <div class="booking-dates">${new Date(b.checkIn).toLocaleDateString()} → ${new Date(b.checkOut).toLocaleDateString()}</div>
+          <div class="booking-email">${b.guestEmail}</div>
+          ${b.guestPhone ? `<div class="booking-email">📱 ${b.guestPhone}</div>` : ''}
+          ${b.specialRequests ? `<div class="booking-email">💬 ${b.specialRequests}</div>` : ''}
+          <div style="margin-top: 0.5rem;">
+            <strong>€${b.totalPrice.toFixed(2)}</strong>
+            <span class="booking-status status-${b.status}">${b.status}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function loadBlockedDates() {
+      try {
+        const response = await fetch(`${API_BASE}/admin/blocked-dates`, {
+          headers: { 'Authorization': `Bearer ${adminToken}` }
+        });
+        if (response.ok) {
+          blockedDates = (await response.json()).map(d => d.date);
+          renderCalendar();
+        }
+      } catch (error) {
+        console.error('Failed to load blocked dates:', error);
+      }
+    }
+
+    function previousMonth() {
+      currentMonth.setMonth(currentMonth.getMonth() - 1);
+      renderCalendar();
+    }
+
+    function nextMonth() {
+      currentMonth.setMonth(currentMonth.getMonth() + 1);
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+
+      document.getElementById('monthYear').textContent =
+        currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
+      const startingDayOfWeek = firstDay.getDay();
+
+      let html = '';
+
+      // Previous month's days
+      const prevMonthLastDay = new Date(year, month, 0).getDate();
+      for (let i = startingDayOfWeek - 1; i >= 0; i--) {
+        html += `<div class="calendar-day other-month">${prevMonthLastDay - i}</div>`;
+      }
+
+      // Current month's days
+      const today = new Date();
+      for (let i = 1; i <= daysInMonth; i++) {
+        const date = new Date(year, month, i);
+        const dateStr = date.toISOString().split('T')[0];
+        const isToday = date.toDateString() === today.toDateString();
+        const isBlocked = blockedDates.includes(dateStr);
+        const isBooked = bookings.some(b => {
+          const checkIn = new Date(b.checkIn);
+          const checkOut = new Date(b.checkOut);
+          return date >= checkIn && date < checkOut;
+        });
+
+        let className = 'calendar-day';
+        if (isToday) className += ' today';
+        if (isBlocked) className += ' blocked';
+        if (isBooked && !isBlocked) className += ' booked';
+
+        html += `<div class="${className}" onclick="selectDate('${dateStr}')">${i}</div>`;
+      }
+
+      // Next month's days
+      const totalCells = html.match(/<div/g).length + (42 - html.match(/<div/g).length);
+      for (let i = 1; i <= (42 - html.match(/<div/g).length); i++) {
+        html += `<div class="calendar-day other-month">${i}</div>`;
+      }
+
+      document.getElementById('calendar').innerHTML = html;
+    }
+
+    function selectDate(dateStr) {
+      document.getElementById('dateInput').value = dateStr;
+    }
+
+    async function toggleDateBlock() {
+      const dateStr = document.getElementById('dateInput').value;
+      if (!dateStr) {
+        alert('Please select a date');
+        return;
+      }
+
+      try {
+        if (blockedDates.includes(dateStr)) {
+          // Unblock
+          const dateRecord = await fetch(`${API_BASE}/admin/blocked-dates`, {
+            headers: { 'Authorization': `Bearer ${adminToken}` }
+          }).then(r => r.json()).then(dates =>
+            dates.find(d => d.date === dateStr)
+          );
+
+          if (dateRecord) {
+            await fetch(`${API_BASE}/admin/blocked-dates/${dateRecord.id}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': `Bearer ${adminToken}` }
+            });
+          }
+        } else {
+          // Block
+          await fetch(`${API_BASE}/blocked-dates`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${adminToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ date: dateStr, reason: 'Blocked by admin' })
+          });
+        }
+
+        document.getElementById('dateInput').value = '';
+        loadBlockedDates();
+      } catch (error) {
+        alert('Failed to toggle date: ' + error.message);
+      }
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('adminToken');
+      adminToken = null;
+      document.getElementById('loginPage').style.display = 'flex';
+      document.getElementById('adminPanel').style.display = 'none';
+      document.getElementById('password').value = '';
+    }
+
+    // Auto-load data every 30 seconds
+    setInterval(() => {
+      if (adminToken) {
+        loadBookings();
+        loadBlockedDates();
+      }
+    }, 30000);
+  </script>
+</body>
+</html>

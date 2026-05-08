@@ -354,6 +354,58 @@ app.post('/api/blocked-dates', (req, res) => {
   );
 });
 
+// Admin login
+app.post('/api/admin/login', (req, res) => {
+  const { password } = req.body;
+  const adminPassword = process.env.ADMIN_PASSWORD || 'jazzxata1';
+
+  if (password === adminPassword) {
+    res.json({ success: true, token: process.env.ADMIN_TOKEN });
+  } else {
+    res.status(401).json({ error: 'Invalid password' });
+  }
+});
+
+// Get all blocked dates
+app.get('/api/admin/blocked-dates', (req, res) => {
+  const adminToken = req.headers.authorization;
+  if (adminToken !== `Bearer ${process.env.ADMIN_TOKEN}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  db.all(`SELECT * FROM blocked_dates ORDER BY date ASC`, (err, dates) => {
+    if (err) return res.status(500).json({ error: 'Database error' });
+    res.json(dates);
+  });
+});
+
+// Delete blocked date
+app.delete('/api/admin/blocked-dates/:id', (req, res) => {
+  const adminToken = req.headers.authorization;
+  if (adminToken !== `Bearer ${process.env.ADMIN_TOKEN}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  db.run(`DELETE FROM blocked_dates WHERE id = ?`, [req.params.id], (err) => {
+    if (err) return res.status(500).json({ error: 'Database error' });
+    res.json({ success: true });
+  });
+});
+
+// Update booking status
+app.put('/api/admin/bookings/:id', (req, res) => {
+  const adminToken = req.headers.authorization;
+  if (adminToken !== `Bearer ${process.env.ADMIN_TOKEN}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const { status } = req.body;
+  db.run(`UPDATE bookings SET status = ? WHERE id = ?`, [status, req.params.id], (err) => {
+    if (err) return res.status(500).json({ error: 'Database error' });
+    res.json({ success: true });
+  });
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
