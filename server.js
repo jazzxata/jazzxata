@@ -325,7 +325,7 @@ app.post('/api/bookings/confirm', (req, res) => {
 app.get('/api/bookings', (req, res) => {
   const adminToken = req.headers.authorization;
 
-  if (adminToken !== `Bearer ${process.env.ADMIN_TOKEN}`) {
+  if (adminToken !== `Bearer ${'admin-secret-token-12345'}`) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -339,7 +339,7 @@ app.get('/api/bookings', (req, res) => {
 app.post('/api/blocked-dates', (req, res) => {
   const adminToken = req.headers.authorization;
 
-  if (adminToken !== `Bearer ${process.env.ADMIN_TOKEN}`) {
+  if (adminToken !== `Bearer ${'admin-secret-token-12345'}`) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -362,10 +362,11 @@ app.post('/api/blocked-dates', (req, res) => {
 // Admin login
 app.post('/api/admin/login', (req, res) => {
   const { password } = req.body;
-  const adminPassword = process.env.ADMIN_PASSWORD || 'jazzxata1';
+  const adminPassword = 'jazzxata1';
+  const adminToken = 'admin-secret-token-12345';
 
   if (password === adminPassword) {
-    res.json({ success: true, token: process.env.ADMIN_TOKEN });
+    res.json({ success: true, token: adminToken });
   } else {
     res.status(401).json({ error: 'Invalid password' });
   }
@@ -374,7 +375,7 @@ app.post('/api/admin/login', (req, res) => {
 // Get all blocked dates
 app.get('/api/admin/blocked-dates', (req, res) => {
   const adminToken = req.headers.authorization;
-  if (adminToken !== `Bearer ${process.env.ADMIN_TOKEN}`) {
+  if (adminToken !== `Bearer ${'admin-secret-token-12345'}`) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -387,7 +388,7 @@ app.get('/api/admin/blocked-dates', (req, res) => {
 // Delete blocked date
 app.delete('/api/admin/blocked-dates/:id', (req, res) => {
   const adminToken = req.headers.authorization;
-  if (adminToken !== `Bearer ${process.env.ADMIN_TOKEN}`) {
+  if (adminToken !== `Bearer ${'admin-secret-token-12345'}`) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
@@ -400,7 +401,7 @@ app.delete('/api/admin/blocked-dates/:id', (req, res) => {
 // Update booking status
 app.put('/api/admin/bookings/:id', (req, res) => {
   const adminToken = req.headers.authorization;
-  if (adminToken !== `Bearer ${process.env.ADMIN_TOKEN}`) {
+  if (adminToken !== `Bearer ${'admin-secret-token-12345'}`) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
