@@ -504,7 +504,7 @@
           );
 
           if (dateRecord) {
-            await fetch(`${API_BASE}/admin/blocked-dates/${dateRecord.id}`, {
+            await fetch(`${API_BASE}/admin/blocked-dates/${dateRecord._id}`, {
               method: 'DELETE',
               headers: { 'Authorization': `Bearer ${adminToken}` }
             });
