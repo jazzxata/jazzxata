@@ -21,6 +21,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Serve admin.html
+app.get('/admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
 // Initialize Stripe
 const stripeClient = stripe(process.env.STRIPE_SECRET_KEY);
 
