@@ -3,7 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const stripe = require('stripe');
 const nodemailer = require('nodemailer');
-const sqlite3 = require('sqlite3').verbose();
+const mongoose = require('mongoose');
 const path = require('path');
 
 dotenv.config();
@@ -29,41 +29,41 @@ app.get('/admin.html', (req, res) => {
 // Initialize Stripe
 const stripeClient = stripe(process.env.STRIPE_SECRET_KEY);
 
-// Initialize Database
-const dbPath = path.join(__dirname, 'jazz_xata.db');
-const db = new sqlite3.Database(dbPath, (err) => {
-  if (err) console.error('Database connection error:', err);
-  else console.log('Connected to SQLite database');
+// Initialize MongoDB Connection
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/jazz_xata';
+
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  console.log('Connected to MongoDB');
+}).catch((err) => {
+  console.error('MongoDB connection error:', err);
 });
 
-// Create tables if they don't exist
-db.serialize(() => {
-  db.run(`
-    CREATE TABLE IF NOT EXISTS bookings (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      guestName TEXT NOT NULL,
-      guestEmail TEXT NOT NULL,
-      guestPhone TEXT,
-      checkIn TEXT NOT NULL,
-      checkOut TEXT NOT NULL,
-      numGuests INTEGER NOT NULL,
-      specialRequests TEXT,
-      totalPrice REAL NOT NULL,
-      stripePaymentId TEXT,
-      status TEXT DEFAULT 'pending',
-      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  db.run(`
-    CREATE TABLE IF NOT EXISTS blocked_dates (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      date TEXT NOT NULL UNIQUE,
-      reason TEXT,
-      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+// Define Mongoose Schemas
+const bookingSchema = new mongoose.Schema({
+  guestName: { type: String, required: true },
+  guestEmail: { type: String, required: true },
+  guestPhone: String,
+  checkIn: { type: String, required: true },
+  checkOut: { type: String, required: true },
+  numGuests: { type: Number, required: true },
+  specialRequests: String,
+  totalPrice: { type: Number, required: true },
+  stripePaymentId: String,
+  status: { type: String, default: 'pending' },
+  createdAt: { type: Date, default: Date.now }
 });
+
+const blockedDateSchema = new mongoose.Schema({
+  date: { type: String, required: true, unique: true },
+  reason: String,
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Booking = mongoose.model('Booking', bookingSchema);
+const BlockedDate = mongoose.model('BlockedDate', blockedDateSchema);
 
 // Email configuration
 const transporter = nodemailer.createTransport({
@@ -169,51 +169,46 @@ Payment ID: ${booking.stripePaymentId || 'Pending'}
 // ============ API ROUTES ============
 
 // Get availability for a date range
-app.get('/api/availability', (req, res) => {
-  const { checkIn, checkOut } = req.query;
+app.get('/api/availability', async (req, res) => {
+  try {
+    const { checkIn, checkOut } = req.query;
 
-  if (!checkIn || !checkOut) {
-    return res.status(400).json({ error: 'checkIn and checkOut dates required' });
-  }
-
-  const startDate = new Date(checkIn);
-  const endDate = new Date(checkOut);
-
-  // Get all booked dates
-  db.all(
-    `SELECT checkIn, checkOut FROM bookings WHERE status != 'cancelled'`,
-    (err, bookings) => {
-      if (err) return res.status(500).json({ error: 'Database error' });
-
-      // Get blocked dates
-      db.all(`SELECT date FROM blocked_dates`, (err, blockedDates) => {
-        if (err) return res.status(500).json({ error: 'Database error' });
-
-        const unavailableDates = [];
-
-        // Add booked date ranges
-        bookings.forEach(booking => {
-          let currentDate = new Date(booking.checkIn);
-          const checkOutDate = new Date(booking.checkOut);
-
-          while (currentDate < checkOutDate) {
-            unavailableDates.push(currentDate.toISOString().split('T')[0]);
-            currentDate.setDate(currentDate.getDate() + 1);
-          }
-        });
-
-        // Add manually blocked dates
-        blockedDates.forEach(bd => {
-          unavailableDates.push(bd.date);
-        });
-
-        res.json({
-          available: true,
-          unavailableDates: [...new Set(unavailableDates)]
-        });
-      });
+    if (!checkIn || !checkOut) {
+      return res.status(400).json({ error: 'checkIn and checkOut dates required' });
     }
-  );
+
+    // Get all booked dates
+    const bookings = await Booking.find({ status: { $ne: 'cancelled' } });
+
+    // Get blocked dates
+    const blockedDates = await BlockedDate.find();
+
+    const unavailableDates = [];
+
+    // Add booked date ranges
+    bookings.forEach(booking => {
+      let currentDate = new Date(booking.checkIn);
+      const checkOutDate = new Date(booking.checkOut);
+
+      while (currentDate < checkOutDate) {
+        unavailableDates.push(currentDate.toISOString().split('T')[0]);
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+    });
+
+    // Add manually blocked dates
+    blockedDates.forEach(bd => {
+      unavailableDates.push(bd.date);
+    });
+
+    res.json({
+      available: true,
+      unavailableDates: [...new Set(unavailableDates)]
+    });
+  } catch (error) {
+    console.error('Availability error:', error);
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 // Create a booking (initiate payment)
@@ -260,24 +255,27 @@ app.post('/api/bookings', async (req, res) => {
     });
 
     // Store booking in database (pending status)
-    db.run(
-      `INSERT INTO bookings (guestName, guestEmail, guestPhone, checkIn, checkOut, numGuests, specialRequests, totalPrice, stripePaymentId, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [guestName, guestEmail, guestPhone, checkIn, checkOut, numGuests, specialRequests, totalPrice, paymentIntent.id, 'pending'],
-      function(err) {
-        if (err) {
-          console.error('Database error:', err);
-          return res.status(500).json({ error: 'Failed to create booking' });
-        }
+    const booking = new Booking({
+      guestName,
+      guestEmail,
+      guestPhone,
+      checkIn,
+      checkOut,
+      numGuests,
+      specialRequests,
+      totalPrice,
+      stripePaymentId: paymentIntent.id,
+      status: 'pending'
+    });
 
-        res.json({
-          success: true,
-          bookingId: this.lastID,
-          clientSecret: paymentIntent.client_secret,
-          totalPrice
-        });
-      }
-    );
+    const savedBooking = await booking.save();
+
+    res.json({
+      success: true,
+      bookingId: savedBooking._id,
+      clientSecret: paymentIntent.client_secret,
+      totalPrice
+    });
   } catch (error) {
     console.error('Booking error:', error);
     res.status(500).json({ error: error.message });
@@ -285,36 +283,29 @@ app.post('/api/bookings', async (req, res) => {
 });
 
 // Confirm payment and complete booking
-app.post('/api/bookings/confirm', (req, res) => {
+app.post('/api/bookings/confirm', async (req, res) => {
   try {
     const { bookingId, paymentIntentId } = req.body;
 
     // Verify payment was successful
-    stripeClient.paymentIntents.retrieve(paymentIntentId, (err, paymentIntent) => {
-      if (err) return res.status(500).json({ error: 'Payment verification failed' });
+    const paymentIntent = await stripeClient.paymentIntents.retrieve(paymentIntentId);
 
-      if (paymentIntent.status !== 'succeeded') {
-        return res.status(400).json({ error: 'Payment not completed' });
-      }
+    if (paymentIntent.status !== 'succeeded') {
+      return res.status(400).json({ error: 'Payment not completed' });
+    }
 
-      // Update booking status to confirmed
-      db.run(
-        `UPDATE bookings SET status = ? WHERE id = ?`,
-        ['confirmed', bookingId],
-        function(err) {
-          if (err) return res.status(500).json({ error: 'Failed to confirm booking' });
+    // Update booking status to confirmed
+    const booking = await Booking.findByIdAndUpdate(
+      bookingId,
+      { status: 'confirmed' },
+      { new: true }
+    );
 
-          // Get booking details and send confirmation email
-          db.get(`SELECT * FROM bookings WHERE id = ?`, [bookingId], (err, booking) => {
-            if (booking) {
-              sendConfirmationEmail(booking);
-            }
-          });
+    if (booking) {
+      sendConfirmationEmail(booking);
+    }
 
-          res.json({ success: true, message: 'Booking confirmed!' });
-        }
-      );
-    });
+    res.json({ success: true, message: 'Booking confirmed!' });
   } catch (error) {
     console.error('Confirmation error:', error);
     res.status(500).json({ error: error.message });
@@ -322,42 +313,46 @@ app.post('/api/bookings/confirm', (req, res) => {
 });
 
 // Get all bookings (admin endpoint - should be protected)
-app.get('/api/bookings', (req, res) => {
-  const adminToken = req.headers.authorization;
+app.get('/api/bookings', async (req, res) => {
+  try {
+    const adminToken = req.headers.authorization;
 
-  if (adminToken !== `Bearer ${'admin-secret-token-12345'}`) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+    if (adminToken !== `Bearer ${'admin-secret-token-12345'}`) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
 
-  db.all(`SELECT * FROM bookings ORDER BY createdAt DESC`, (err, bookings) => {
-    if (err) return res.status(500).json({ error: 'Database error' });
+    const bookings = await Booking.find().sort({ createdAt: -1 });
     res.json(bookings);
-  });
+  } catch (error) {
+    console.error('Fetch bookings error:', error);
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 // Block a date (admin endpoint)
-app.post('/api/blocked-dates', (req, res) => {
-  const { date, reason } = req.body;
-  console.log('📅 Block date request:', date);
+app.post('/api/blocked-dates', async (req, res) => {
+  try {
+    const { date, reason } = req.body;
+    console.log('📅 Block date request:', date);
 
-  if (!date) {
-    console.log('❌ No date provided');
-    return res.status(400).json({ error: 'Date required' });
-  }
-
-  console.log('🔄 Inserting into database...');
-  db.run(
-    `INSERT INTO blocked_dates (date, reason) VALUES (?, ?)`,
-    [date, reason || null],
-    (err) => {
-      if (err) {
-        console.error('❌ Database error:', err.message);
-        return res.status(500).json({ error: 'Failed to block date: ' + err.message });
-      }
-      console.log('✅ Date blocked successfully:', date);
-      res.json({ success: true });
+    if (!date) {
+      console.log('❌ No date provided');
+      return res.status(400).json({ error: 'Date required' });
     }
-  );
+
+    console.log('🔄 Inserting into database...');
+    const blockedDate = new BlockedDate({
+      date,
+      reason: reason || null
+    });
+
+    await blockedDate.save();
+    console.log('✅ Date blocked successfully:', date);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('❌ Database error:', error.message);
+    res.status(500).json({ error: 'Failed to block date: ' + error.message });
+  }
 });
 
 // Admin login
@@ -374,33 +369,42 @@ app.post('/api/admin/login', (req, res) => {
 });
 
 // Get all blocked dates
-app.get('/api/admin/blocked-dates', (req, res) => {
-  db.all(`SELECT * FROM blocked_dates ORDER BY date ASC`, (err, dates) => {
-    if (err) return res.status(500).json({ error: 'Database error' });
+app.get('/api/admin/blocked-dates', async (req, res) => {
+  try {
+    const dates = await BlockedDate.find().sort({ date: 1 });
     res.json(dates || []);
-  });
+  } catch (error) {
+    console.error('Fetch blocked dates error:', error);
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 // Delete blocked date
-app.delete('/api/admin/blocked-dates/:id', (req, res) => {
-  db.run(`DELETE FROM blocked_dates WHERE id = ?`, [req.params.id], (err) => {
-    if (err) return res.status(500).json({ error: 'Database error' });
+app.delete('/api/admin/blocked-dates/:id', async (req, res) => {
+  try {
+    await BlockedDate.findByIdAndDelete(req.params.id);
     res.json({ success: true });
-  });
+  } catch (error) {
+    console.error('Delete blocked date error:', error);
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 // Update booking status
-app.put('/api/admin/bookings/:id', (req, res) => {
-  const adminToken = req.headers.authorization;
-  if (adminToken !== `Bearer ${'admin-secret-token-12345'}`) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+app.put('/api/admin/bookings/:id', async (req, res) => {
+  try {
+    const adminToken = req.headers.authorization;
+    if (adminToken !== `Bearer ${'admin-secret-token-12345'}`) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
 
-  const { status } = req.body;
-  db.run(`UPDATE bookings SET status = ? WHERE id = ?`, [status, req.params.id], (err) => {
-    if (err) return res.status(500).json({ error: 'Database error' });
+    const { status } = req.body;
+    await Booking.findByIdAndUpdate(req.params.id, { status });
     res.json({ success: true });
-  });
+  } catch (error) {
+    console.error('Update booking error:', error);
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 // Health check
