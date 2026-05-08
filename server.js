@@ -338,16 +338,23 @@ app.get('/api/bookings', (req, res) => {
 // Block a date (admin endpoint)
 app.post('/api/blocked-dates', (req, res) => {
   const { date, reason } = req.body;
+  console.log('📅 Block date request:', date);
 
   if (!date) {
+    console.log('❌ No date provided');
     return res.status(400).json({ error: 'Date required' });
   }
 
+  console.log('🔄 Inserting into database...');
   db.run(
     `INSERT INTO blocked_dates (date, reason) VALUES (?, ?)`,
     [date, reason || null],
     (err) => {
-      if (err) return res.status(500).json({ error: 'Failed to block date' });
+      if (err) {
+        console.error('❌ Database error:', err.message);
+        return res.status(500).json({ error: 'Failed to block date: ' + err.message });
+      }
+      console.log('✅ Date blocked successfully:', date);
       res.json({ success: true });
     }
   );
