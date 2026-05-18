@@ -1440,6 +1440,8 @@
 
   // ============ STICKY NAV & FAQ ============
   const nav = document.getElementById('topNav');
+  const floatingBtn = document.querySelector('.floating-book-btn');
+
   console.log('🔍 Nav element found:', nav);
   if (nav) {
     console.log('✅ Nav element exists, display:', window.getComputedStyle(nav).display);
@@ -1448,6 +1450,21 @@
   } else {
     console.error('❌ Nav element not found!');
   }
+
+  console.log('🔍 Floating button found:', floatingBtn);
+  if (floatingBtn) {
+    const btnStyles = window.getComputedStyle(floatingBtn);
+    console.log('✅ Button exists - display:', btnStyles.display);
+    console.log('✅ Button visibility:', btnStyles.visibility);
+    console.log('✅ Button position:', btnStyles.position);
+    console.log('✅ Button bottom:', btnStyles.bottom);
+    console.log('✅ Button right:', btnStyles.right);
+    console.log('✅ Button background:', btnStyles.backgroundColor);
+    console.log('✅ Button text content:', floatingBtn.textContent);
+  } else {
+    console.error('❌ Floating button not found!');
+  }
+
   window.addEventListener('scroll', () => {
     if (nav) nav.classList.toggle('scrolled', window.scrollY > 20);
   });
