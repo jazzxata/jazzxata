@@ -1,19 +1,4 @@
 {
   "version": 2,
-  "buildCommand": "npm install",
-  "env": {
-    "MONGODB_URI": "@mongodb_uri",
-    "STRIPE_SECRET_KEY": "@stripe_secret_key",
-    "STRIPE_PUBLISHABLE_KEY": "@stripe_publishable_key",
-    "EMAIL_USER": "@email_user",
-    "EMAIL_PASSWORD": "@email_password",
-    "OWNER_EMAIL": "@owner_email",
-    "ADMIN_TOKEN": "@admin_token"
-  },
-  "functions": {
-    "server.js": {
-      "memory": 1024,
-      "maxDuration": 30
-    }
-  }
+  "buildCommand": "npm install"
 }
