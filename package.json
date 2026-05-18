@@ -1,13 +1,16 @@
 {
   "name": "jazz-xata-booking",
   "version": "1.0.0",
-  "description": "Direct booking system for Jazz Xata cottage rental",
+  "description": "Direct booking system for Jazz Xata cottage rental in the Carpathians. Bilingual (EN/UK) website with Stripe payments and guest reviews.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-  "keywords": ["booking", "rental", "cottage"],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": ["booking", "rental", "cottage", "carpathians", "ukraine"],
   "author": "Jazz Xata",
   "license": "MIT",
   "dependencies": {
@@ -22,3 +25,4 @@
     "nodemon": "^3.0.1"
   }
 }
+

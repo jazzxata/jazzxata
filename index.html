@@ -163,22 +163,25 @@
   }
   .cta {
     display: inline-block;
-    padding: 0.9rem 2rem;
+    padding: 1rem 2.5rem;
     background: var(--cream);
     color: var(--charcoal);
     border-radius: 2px;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    font-size: 0.85rem;
-    transition: all 0.2s;
-    border: 1px solid var(--cream);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: 2px solid var(--cream);
     cursor: pointer;
+    box-shadow: 0 4px 12px rgba(250, 246, 238, 0.3);
   }
   .cta:hover {
     background: transparent;
     color: var(--cream);
     border-color: var(--cream);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(250, 246, 238, 0.5);
   }
   .cta.dark {
     background: var(--charcoal);
@@ -466,6 +469,13 @@
     border: 1px solid var(--tan);
     padding: 2rem;
     border-radius: 4px;
+    display: block;
+  }
+  .booking-step {
+    display: block;
+  }
+  .booking-step[style*="display: none"] {
+    display: none !important;
   }
   .form-group {
     margin-bottom: 1.5rem;
@@ -541,22 +551,31 @@
     margin-top: 1.5rem;
   }
   .booking-btn {
-    padding: 0.9rem 1.5rem;
+    padding: 1rem 2rem;
     border: none;
     border-radius: 2px;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
+    display: inline-block;
+    min-width: 150px;
   }
   .booking-btn.submit {
-    background: var(--charcoal);
-    color: var(--cream);
+    background: var(--charcoal) !important;
+    color: var(--cream) !important;
+    box-shadow: 0 2px 8px rgba(45, 42, 38, 0.2);
+    border: none;
   }
-  .booking-btn.submit:hover {
-    background: var(--wood-dark);
+  .booking-btn.submit:not(:disabled):hover {
+    background: var(--wood-dark) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(45, 42, 38, 0.3);
+  }
+  .booking-btn.submit:not(:disabled):active {
+    transform: translateY(0);
   }
   .booking-btn.copy {
     background: var(--wood);
@@ -566,8 +585,9 @@
     background: var(--wood-dark);
   }
   .booking-btn:disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
+    background: #999 !important;
   }
   .success-message {
     background: rgba(79, 111, 82, 0.1);
@@ -583,6 +603,62 @@
     .booking-form { padding: 1.5rem; }
     .date-row { grid-template-columns: 1fr; }
     .booking-actions { grid-template-columns: 1fr; }
+  }
+  /* ============ REVIEWS ============ */
+  .reviews h2 { text-align: center; margin-bottom: 0.5rem; }
+  .reviews .lede {
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 3rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+  .review-card {
+    background: var(--cream);
+    border: 1px solid var(--tan);
+    padding: 2rem;
+    border-radius: 4px;
+  }
+  .review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+  .reviewer-info h4 {
+    font-size: 1rem;
+    color: var(--charcoal);
+    margin-bottom: 0.25rem;
+  }
+  .reviewer-info p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0;
+  }
+  .review-rating {
+    color: var(--wood);
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+  }
+  .review-text {
+    color: var(--charcoal);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+  .review-source {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-transform: uppercase;
   }
   /* ============ FOOTER ============ */
   footer {
@@ -609,8 +685,38 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     font-weight: 500;
+    transition: all 0.2s;
   }
   .book-link:hover { background: var(--wood-dark); color: var(--cream) !important; }
+
+  /* Floating booking button (mobile) */
+  .floating-book-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 1.5rem;
+    background: var(--wood);
+    color: var(--cream);
+    padding: 1rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    box-shadow: 0 4px 12px rgba(107, 68, 38, 0.3);
+    z-index: 50;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    display: none;
+  }
+  .floating-book-btn:hover {
+    background: var(--wood-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(107, 68, 38, 0.4);
+  }
+  @media (max-width: 768px) {
+    .floating-book-btn { display: block; }
+  }
 </style>
 </head>
 <body>
@@ -821,6 +927,17 @@
     </div>
   </div>
 </section>
+<!-- ============ REVIEWS ============ -->
+<section class="reviews deep-bg" id="reviews">
+  <div class="container">
+    <span class="section-eyebrow" data-en="What guests say" data-uk="Що кажуть гості" style="text-align:center;display:block">What guests say</span>
+    <h2 data-en="Loved by everyone who visits" data-uk="Подобається всім гостям">Loved by everyone who visits</h2>
+    <p class="lede" data-en="Read reviews from Airbnb, Booking.com, and past guests." data-uk="Читайте відгуки з Airbnb, Booking.com та попередніх гостей.">Read reviews from Airbnb, Booking.com, and past guests.</p>
+    <div class="reviews-grid" id="reviewsGrid">
+      <!-- Reviews will be loaded here via JavaScript -->
+    </div>
+  </div>
+</section>
 <!-- ============ BOOKING ============ -->
 <section class="book" id="book">
   <div class="container">
@@ -836,9 +953,9 @@
       <!-- Step 1: Select Dates -->
       <div id="step1" class="booking-step">
         <h3 data-en="Step 1: Select your dates" data-uk="Крок 1: Виберіть дати">Step 1: Select your dates</h3>
-        <p style="color: var(--muted); margin-bottom: 1.5rem;" data-en="Click on dates to select check-in and check-out. Grayed out dates are unavailable." data-uk="Натисніть на дати, щоб вибрати заселення та виселення. Сірі дати недоступні.">Click on dates to select check-in and check-out. Grayed out dates are unavailable.</p>
+        <p style="color: var(--muted); margin-bottom: 1.5rem; font-size: 0.95rem;" data-en="Click on dates to select check-in and check-out. Grayed out dates are unavailable." data-uk="Натисніть на дати, щоб вибрати заселення та виселення. Сірі дати недоступні.">Click on dates to select check-in and check-out. Grayed out dates are unavailable.</p>
 
-        <div id="calendarContainer" style="margin-bottom: 2rem;"></div>
+        <div id="calendarContainer" style="margin-bottom: 1.5rem; max-height: 400px; overflow-y: auto; padding: 0.5rem; border: 1px solid var(--tan); border-radius: 2px; background: var(--cream);"></div>
 
         <div class="form-group">
           <label data-en="Selected dates" data-uk="Вибрані дати">Selected dates</label>
@@ -854,11 +971,14 @@
           </div>
         </div>
 
-        <button type="button" class="booking-btn submit" id="continueToStep2" disabled data-en="Continue" data-uk="Далі">Continue</button>
+        <div style="margin-top: 2rem; padding: 1rem; background: var(--cream-deep); border-radius: 2px;">
+          <p style="font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem;" data-en="After selecting dates, click Continue below:" data-uk="Після вибору дат натисніть кнопку нижче:">After selecting dates, click Continue below:</p>
+          <button type="button" class="booking-btn submit" id="continueToStep2" disabled onclick="handleContinueToStep2()" data-en="Complete Booking" data-uk="Завершити бронювання" style="width: 100%; display: block; margin: 0 auto; padding: 1.2rem 2rem; font-size: 1rem;">✓ Complete Booking</button>
+        </div>
       </div>
 
-      <!-- Step 2: Guest Details & Payment -->
-      <div id="step2" class="booking-step" style="display: none;">
+      <!-- Step 2: Guest Details & Payment (Separate Page) -->
+      <div id="step2" class="booking-step" style="display: none; animation: fadeIn 0.3s;">
         <h3 data-en="Step 2: Your details & payment" data-uk="Крок 2: Ваші дані та платіж">Step 2: Your details & payment</h3>
 
         <!-- Guest name -->
@@ -919,7 +1039,7 @@
 
         <!-- Submit button -->
         <div class="booking-actions" style="margin-top: 2rem;">
-          <button type="button" class="booking-btn submit" style="background: var(--muted);" id="backToStep1" data-en="Back" data-uk="Назад">Back</button>
+          <button type="button" class="booking-btn submit" style="background: var(--muted);" id="backToStep1" data-en="← Back to Date Selection" data-uk="← Назад до вибору дат">← Back to Date Selection</button>
           <button type="submit" class="booking-btn submit" id="submitBtn" data-en="Complete booking" data-uk="Завершити бронювання">Complete booking</button>
         </div>
       </div>
@@ -940,6 +1060,9 @@
     </form>
   </div>
 </section>
+<!-- ============ FLOATING BOOK BUTTON (Mobile) ============ -->
+<button class="floating-book-btn" onclick="document.getElementById('book').scrollIntoView({behavior: 'smooth'})" data-en="Book Now" data-uk="Бронювати">Book Now</button>
+
 <!-- ============ FOOTER ============ -->
 <footer>
   <div class="logo">Jazz <em>Xata</em></div>
@@ -976,26 +1099,121 @@
   }
 
   async function initializeApp() {
-    initStripe();
-    generateCalendar();
-    await loadUnavailableDates();
-    setupEventListeners();
+    try {
+      initStripe();
+      generateCalendar();
+      await loadUnavailableDates();
+      displayReviews();
+      setupEventListeners();
+      setupBookingFormListeners();
+      const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+      setLang(savedLang);
+      console.log('✅ App initialized successfully');
+    } catch (error) {
+      console.error('❌ Initialization error:', error);
+    }
+  }
+
+  function setupBookingFormListeners() {
+    const continueBtn = document.getElementById('continueToStep2');
+    const backBtn = document.getElementById('backToStep1');
+    const bookingForm = document.getElementById('bookingForm');
+
+    if (continueBtn) {
+      continueBtn.addEventListener('click', handleContinueToStep2);
+    }
+    if (backBtn) {
+      backBtn.addEventListener('click', handleBackToStep1);
+    }
+    if (bookingForm) {
+      bookingForm.addEventListener('submit', handleBookingSubmit);
+    }
+  }
+
+  function handleContinueToStep2() {
+    console.log('Complete Booking clicked');
+    console.log('Check-in:', selectedCheckIn);
+    console.log('Check-out:', selectedCheckOut);
+
+    if (!selectedCheckIn || !selectedCheckOut) {
+      alert('Please select both check-in and check-out dates');
+      return;
+    }
+
+    const checkInDate = new Date(selectedCheckIn);
+    const checkOutDate = new Date(selectedCheckOut);
+    const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
+
+    if (nights < MIN_STAY) {
+      alert(`Minimum ${MIN_STAY} nights required`);
+      return;
+    }
+
+    // Save booking data to localStorage
+    const bookingData = {
+      checkIn: selectedCheckIn,
+      checkOut: selectedCheckOut,
+      nights: nights
+    };
+    localStorage.setItem('bookingData', JSON.stringify(bookingData));
+
+    console.log('Navigating to booking-step2.html');
+    // Navigate to the separate booking page
+    window.location.href = 'booking-step2.html';
+  }
+
+  function handleBackToStep1() {
+    document.getElementById('step1').style.display = 'block';
+    document.getElementById('step2').style.display = 'none';
+  }
+
+  async function handleBookingSubmit(e) {
+    e.preventDefault();
+
+    const guestName = document.getElementById('guestName').value.trim();
+    const guestEmail = document.getElementById('guestEmail').value.trim();
+
+    if (!guestName || !guestEmail) {
+      showError('Please fill in all required fields');
+      return;
+    }
+
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('loadingIndicator').style.display = 'block';
+
+    try {
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: window.location.origin + '?booking=success'
+        }
+      });
+
+      if (error) {
+        showError(error.message);
+      }
+    } catch (error) {
+      showError('Payment failed: ' + error.message);
+    } finally {
+      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('loadingIndicator').style.display = 'none';
+    }
   }
 
   // ============ CALENDAR FUNCTIONALITY ============
   function generateCalendar() {
     const today = new Date();
-    const nextYear = new Date(today.getFullYear() + 1, today.getMonth(), today.getDate());
+    const nextMonths = new Date(today.getFullYear(), today.getMonth() + 4, today.getDate());
     const container = document.getElementById('calendarContainer');
     container.innerHTML = '';
 
-    for (let d = new Date(today); d <= nextYear; d.setMonth(d.getMonth() + 1)) {
-      const monthYear = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    for (let d = new Date(today); d <= nextMonths; d.setMonth(d.getMonth() + 1)) {
+      const monthYear = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
       const monthDiv = document.createElement('div');
-      monthDiv.style.marginBottom = '2rem';
+      monthDiv.style.marginBottom = '1rem';
 
-      let html = `<h4 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--charcoal);">${monthYear}</h4>`;
-      html += '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.5rem;">';
+      let html = `<h4 style="font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--charcoal); font-weight: 600;">${monthYear}</h4>`;
+      html += '<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.2rem;">';
 
       const firstDay = new Date(d.getFullYear(), d.getMonth(), 1);
       const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0);
@@ -1020,7 +1238,7 @@
         const isSelected = (dateStr === selectedCheckIn) || (dateStr === selectedCheckOut);
         const isInRange = selectedCheckIn && selectedCheckOut && dateStr > selectedCheckIn && dateStr < selectedCheckOut;
 
-        let style = 'padding: 0.75rem; text-align: center; cursor: pointer; border: 1px solid var(--tan); border-radius: 2px; font-size: 0.85rem; ';
+        let style = 'padding: 0.4rem 0.25rem; text-align: center; cursor: pointer; border: 1px solid var(--tan); border-radius: 2px; font-size: 0.7rem; ';
 
         if (isPast) {
           style += 'background: #f0f0f0; color: #ccc; cursor: not-allowed;';
@@ -1092,66 +1310,6 @@
     }
   }
 
-  // ============ FORM NAVIGATION ============
-  document.getElementById('continueToStep2').addEventListener('click', async () => {
-    if (!selectedCheckIn || !selectedCheckOut) return;
-
-    const checkInDate = new Date(selectedCheckIn);
-    const checkOutDate = new Date(selectedCheckOut);
-    const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-
-    if (nights < MIN_STAY) {
-      alert(`Minimum ${MIN_STAY} nights required`);
-      return;
-    }
-
-    // Calculate price
-    let totalPrice = 0;
-    let currentDate = new Date(checkInDate);
-    const breakdownItems = [];
-
-    while (currentDate < checkOutDate) {
-      const month = currentDate.getMonth() + 1;
-      const season = pricingSeasons.find(s => s.months.includes(month)) || pricingSeasons[0];
-      const dateStr = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-      breakdownItems.push({
-        date: dateStr,
-        price: season.pricePerNight
-      });
-
-      totalPrice += season.pricePerNight;
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    // Update breakdown
-    const breakdownEl = document.getElementById('priceBreakdownDetails');
-    breakdownEl.innerHTML = breakdownItems.map(item => `
-      <div class="price-breakdown">
-        <span>${item.date}</span>
-        <span>€${item.price}</span>
-      </div>
-    `).join('');
-    document.getElementById('totalPrice').textContent = `€${totalPrice}`;
-
-    // Initialize Stripe payment element
-    const clientSecret = await initiateBooking(totalPrice);
-    if (clientSecret) {
-      elements = stripe.elements({ clientSecret });
-      paymentElement = elements.create('payment');
-      paymentElement.mount('#payment-element');
-
-      // Show step 2
-      document.getElementById('step1').style.display = 'none';
-      document.getElementById('step2').style.display = 'block';
-    }
-  });
-
-  document.getElementById('backToStep1').addEventListener('click', () => {
-    document.getElementById('step1').style.display = 'block';
-    document.getElementById('step2').style.display = 'none';
-  });
-
   // ============ BOOKING SUBMISSION ============
   async function initiateBooking(totalPrice) {
     try {
@@ -1181,39 +1339,6 @@
     }
   }
 
-  document.getElementById('bookingForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const guestName = document.getElementById('guestName').value.trim();
-    const guestEmail = document.getElementById('guestEmail').value.trim();
-
-    if (!guestName || !guestEmail) {
-      showError('Please fill in all required fields');
-      return;
-    }
-
-    document.getElementById('submitBtn').disabled = true;
-    document.getElementById('loadingIndicator').style.display = 'block';
-
-    try {
-      const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: window.location.origin + '?booking=success'
-        }
-      });
-
-      if (error) {
-        showError(error.message);
-      }
-    } catch (error) {
-      showError('Payment failed: ' + error.message);
-    } finally {
-      document.getElementById('submitBtn').disabled = false;
-      document.getElementById('loadingIndicator').style.display = 'none';
-    }
-  });
-
   // ============ HELPERS ============
   function showError(message) {
     const errorEl = document.getElementById('errorMessage');
@@ -1226,6 +1351,86 @@
     document.documentElement.lang = lang === 'uk' ? 'uk' : 'en';
     document.querySelectorAll('.lang-toggle button').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.lang-toggle button')[lang === 'uk' ? 1 : 0].classList.add('active');
+    displayReviews();
+    localStorage.setItem('preferredLanguage', lang);
+  }
+
+  // ============ REVIEWS SYSTEM ============
+  const sampleReviews = [
+    {
+      name: "Sarah M.",
+      source: "Airbnb",
+      rating: "★★★★★",
+      date: "October 2024",
+      text_en: "Absolutely magical place. The cottage is beautifully decorated, incredibly cozy, and perfectly positioned for exploring the mountains. The fireplace and sauna made our stay unforgettable.",
+      text_uk: "Абсолютно чарівне місце. Хата прекрасно оформлена, неймовірно затишна й ідеально розташована для досліджень гір. Камін і сауна зробили наш відпочинок незабутнім."
+    },
+    {
+      name: "Michael L.",
+      source: "Booking.com",
+      rating: "★★★★★",
+      date: "September 2024",
+      text_en: "Perfect base for hiking and skiing. The hosts were incredibly helpful with trail recommendations and transfers. Jazz Xata exceeded all expectations.",
+      text_uk: "Ідеальна база для походів і лиж. Господарі дуже допомагали порадами щодо стежок і трансфертів. Jazz Хата перевершила всі очікування."
+    },
+    {
+      name: "Elena K.",
+      source: "Airbnb",
+      rating: "★★★★★",
+      date: "August 2024",
+      text_en: "A writer's paradise. The quiet, the views, the thoughtfully curated library and art supplies – everything inspired creativity. We came for a week and didn't want to leave.",
+      text_uk: "Рай для письменника. Тиша, вид, продумано підібрана бібліотека й матеріали для творчості – все надихало на творчість. Ми прилетіли на тиждень і не хотіли їхати."
+    },
+    {
+      name: "James & Anna",
+      source: "Booking.com",
+      rating: "★★★★★",
+      date: "July 2024",
+      text_en: "The sauna after a day on the mountain is unbeatable. Local hospitality at its finest. We're already planning our return visit.",
+      text_uk: "Сауна після дня в горах – незрівнянна. Місцева гостинність у кращому вигляді. Ми вже плануємо повернення."
+    },
+    {
+      name: "Thomas V.",
+      source: "Airbnb",
+      rating: "★★★★★",
+      date: "June 2024",
+      text_en: "More than a rental – it's a retreat. The attention to detail in every corner, from the fireplace setup to the kitchen fully stocked with essentials. Remarkable.",
+      text_uk: "Більше ніж оренда – це прихисток. Увага до деталей в кожному кутку, від налаштування каміна до повністю обладнаної кухні. Чудово."
+    },
+    {
+      name: "Lucia & Marco",
+      source: "Booking.com",
+      rating: "★★★★★",
+      date: "May 2024",
+      text_en: "From the moment we arrived, we felt at home. The cottage's warmth – both literal and figurative – made our honeymoon truly special.",
+      text_uk: "З моменту прибуття ми почувалися як вдома. Тепло хати – як буквальне, так і переносне – зробило нашу медову місяць справді особливою."
+    }
+  ];
+
+  function displayReviews() {
+    const reviewsGrid = document.getElementById('reviewsGrid');
+    if (!reviewsGrid) return;
+
+    reviewsGrid.innerHTML = sampleReviews.map(review => {
+      const text = document.body.classList.contains('lang-uk') ? review.text_uk : review.text_en;
+      const sourceColor = review.source === 'Airbnb' ? '#FF5A5F' : '#003580';
+
+      return `
+        <div class="review-card">
+          <div class="review-header">
+            <div class="reviewer-info">
+              <h4>${review.name}</h4>
+              <p>${review.date}</p>
+            </div>
+            <div class="review-rating">${review.rating}</div>
+          </div>
+          <p class="review-text">"${text}"</p>
+          <div class="review-source">
+            <span style="color: ${sourceColor}; font-weight: 600;">${review.source}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   // ============ STICKY NAV & FAQ ============

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complete Your Booking — Jazz Xata</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+  :root {
+    --cream: #FAF6EE;
+    --cream-warm: #F0E6D2;
+    --cream-deep: #E8DCC2;
+    --tan: #D9CDB8;
+    --wood: #8B5A3C;
+    --wood-dark: #6B4426;
+    --forest: #4F6F52;
+    --charcoal: #2D2A26;
+    --ink: #1C1A17;
+    --muted: #6B655B;
+    --max-width: 1200px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--cream);
+    padding: 2rem 1.5rem;
+  }
+  h1, h2, h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    line-height: 1.15;
+    color: var(--charcoal);
+  }
+  h1 { font-size: 2.5rem; margin-bottom: 2rem; }
+  h2 { font-size: 1.75rem; margin-bottom: 1rem; }
+  h3 { font-size: 1.2rem; margin-bottom: 0.75rem; }
+  p { margin-bottom: 1rem; }
+
+  .container { max-width: 800px; margin: 0 auto; }
+  .header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--tan);
+  }
+  .header-back {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--muted);
+    color: var(--cream);
+    border-radius: 2px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .header-back:hover {
+    background: var(--wood-dark);
+  }
+
+  .dates-summary {
+    background: var(--cream-warm);
+    padding: 1.5rem;
+    border-radius: 4px;
+    margin-bottom: 3rem;
+    border: 1px solid var(--tan);
+  }
+  .dates-summary h3 {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+  }
+  .date-display {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .date-display div {
+    padding: 0.75rem;
+    background: var(--cream);
+    border: 1px solid var(--tan);
+    border-radius: 2px;
+  }
+  .date-display label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 0.25rem;
+  }
+  .date-display span {
+    font-weight: 600;
+    color: var(--charcoal);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  .form-group label {
+    display: block;
+    font-weight: 500;
+    color: var(--charcoal);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--tan);
+    border-radius: 2px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--charcoal);
+    background: var(--cream);
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--wood);
+    box-shadow: 0 0 0 2px rgba(139, 90, 60, 0.1);
+  }
+  .form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .pricing-section {
+    background: var(--cream-deep);
+    border: 1px solid var(--tan);
+    padding: 1.5rem;
+    border-radius: 2px;
+    margin: 2rem 0;
+  }
+  .pricing-section h3 {
+    margin-bottom: 1rem;
+  }
+  .price-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .price-total {
+    border-top: 1px solid var(--tan);
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  .payment-section {
+    margin: 2rem 0;
+  }
+  .payment-section h3 {
+    margin-bottom: 1rem;
+  }
+  #payment-element {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-error {
+    color: #c44545;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: none;
+  }
+  .form-error.show { display: block; }
+
+  .button-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  .btn {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 2px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .btn-back {
+    background: var(--muted);
+    color: var(--cream);
+  }
+  .btn-back:hover {
+    background: var(--wood-dark);
+  }
+  .btn-submit {
+    background: var(--charcoal);
+    color: var(--cream);
+  }
+  .btn-submit:hover {
+    background: var(--wood-dark);
+    transform: translateY(-2px);
+  }
+  .btn-submit:disabled {
+    background: #999;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .success-message {
+    background: rgba(79, 111, 82, 0.1);
+    border: 1px solid var(--forest);
+    color: var(--forest);
+    padding: 1.5rem;
+    border-radius: 2px;
+    margin: 2rem 0;
+    display: none;
+  }
+  .success-message.show { display: block; }
+
+  @media (max-width: 720px) {
+    h1 { font-size: 1.75rem; }
+    .button-group { grid-template-columns: 1fr; }
+    .date-display { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <a href="index.html#book" class="header-back">← Change Dates</a>
+    <h1>Complete Your Booking</h1>
+    <p style="color: var(--muted);">Enter your details and payment information</p>
+  </div>
+
+  <!-- Dates Summary -->
+  <div class="dates-summary">
+    <h3>Your Selected Dates</h3>
+    <div class="date-display">
+      <div>
+        <label>Check-in</label>
+        <span id="displayCheckIn">—</span>
+      </div>
+      <div>
+        <label>Check-out</label>
+        <span id="displayCheckOut">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Form -->
+  <form id="bookingForm">
+    <!-- Guest Name -->
+    <div class="form-group">
+      <label for="guestName">Full Name *</label>
+      <input type="text" id="guestName" name="guestName" required>
+      <div class="form-error" id="nameError">Please enter your name</div>
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+      <label for="guestEmail">Email Address *</label>
+      <input type="email" id="guestEmail" name="guestEmail" required>
+      <div class="form-error" id="emailError">Please enter a valid email</div>
+    </div>
+
+    <!-- Number of Guests -->
+    <div class="form-group">
+      <label for="numGuests">Number of Guests *</label>
+      <select id="numGuests" name="numGuests" required>
+        <option value="">-- Select --</option>
+        <option value="1">1 guest</option>
+        <option value="2">2 guests</option>
+        <option value="3">3 guests</option>
+        <option value="4">4 guests</option>
+        <option value="5">5 guests</option>
+      </select>
+    </div>
+
+    <!-- Phone -->
+    <div class="form-group">
+      <label for="guestPhone">Phone Number (optional)</label>
+      <input type="text" id="guestPhone" name="guestPhone" placeholder="+38...">
+    </div>
+
+    <!-- Special Requests -->
+    <div class="form-group">
+      <label for="specialRequests">Special Requests (optional)</label>
+      <textarea id="specialRequests" name="specialRequests" placeholder="Dinner service, transfers, activities, etc."></textarea>
+    </div>
+
+    <!-- Price Breakdown -->
+    <div class="pricing-section">
+      <h3>Price Breakdown</h3>
+      <div id="priceBreakdown"></div>
+      <div class="price-total">
+        <span>Total Cost</span>
+        <span id="totalPrice">€0</span>
+      </div>
+    </div>
+
+    <!-- Payment Section -->
+    <div class="payment-section">
+      <h3>Payment Information</h3>
+      <p style="color: var(--muted); margin-bottom: 1rem; font-size: 0.9rem;">
+        Secure payment powered by Stripe. We never store your card details.
+      </p>
+      <div id="payment-element"></div>
+      <div id="payment-message" class="form-error"></div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="button-group">
+      <button type="button" class="btn btn-back" onclick="window.location.href='index.html#book'">← Change Dates</button>
+      <button type="submit" class="btn btn-submit" id="submitBtn">Complete Booking</button>
+    </div>
+
+    <!-- Messages -->
+    <div class="success-message" id="successMessage">
+      <strong>✓ Booking confirmed!</strong>
+      <p>Check your email for confirmation details and next steps.</p>
+    </div>
+    <div id="errorMessage" class="form-error" style="margin-top: 1rem;"></div>
+  </form>
+</div>
+
+<script>
+  const API_BASE = '/api';
+  const STRIPE_PUBLISHABLE_KEY = 'pk_test_placeholder';
+
+  const pricingSeasons = [
+    { months: [11, 12, 1, 2, 3], pricePerNight: 80 },
+    { months: [4, 10], pricePerNight: 120 },
+    { months: [5, 6, 7, 8, 9], pricePerNight: 180 }
+  ];
+
+  let stripe, elements, paymentElement;
+  let bookingData = {};
+
+  // Initialize on page load
+  window.addEventListener('DOMContentLoaded', () => {
+    loadBookingData();
+    initStripe();
+    setupFormListeners();
+  });
+
+  function loadBookingData() {
+    // Get booking data from localStorage (set by main page)
+    bookingData = JSON.parse(localStorage.getItem('bookingData') || '{}');
+
+    if (!bookingData.checkIn || !bookingData.checkOut) {
+      alert('No dates selected. Please go back and select dates.');
+      window.location.href = 'index.html#book';
+      return;
+    }
+
+    // Display selected dates
+    document.getElementById('displayCheckIn').textContent =
+      new Date(bookingData.checkIn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    document.getElementById('displayCheckOut').textContent =
+      new Date(bookingData.checkOut).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+    // Calculate and display pricing
+    calculatePricing();
+  }
+
+  function calculatePricing() {
+    const checkInDate = new Date(bookingData.checkIn);
+    const checkOutDate = new Date(bookingData.checkOut);
+    let totalPrice = 0;
+    let currentDate = new Date(checkInDate);
+    const breakdownItems = [];
+
+    while (currentDate < checkOutDate) {
+      const month = currentDate.getMonth() + 1;
+      const season = pricingSeasons.find(s => s.months.includes(month)) || pricingSeasons[0];
+      const dateStr = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+      breakdownItems.push({
+        date: dateStr,
+        price: season.pricePerNight
+      });
+
+      totalPrice += season.pricePerNight;
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // Display breakdown
+    document.getElementById('priceBreakdown').innerHTML = breakdownItems.map(item => `
+      <div class="price-row">
+        <span>${item.date}</span>
+        <span>€${item.price}</span>
+      </div>
+    `).join('');
+    document.getElementById('totalPrice').textContent = `€${totalPrice}`;
+    bookingData.totalPrice = totalPrice;
+  }
+
+  function initStripe() {
+    stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+  }
+
+  function setupFormListeners() {
+    document.getElementById('bookingForm').addEventListener('submit', handleSubmit);
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    const guestName = document.getElementById('guestName').value.trim();
+    const guestEmail = document.getElementById('guestEmail').value.trim();
+
+    if (!guestName || !guestEmail) {
+      showError('Please fill in all required fields');
+      return;
+    }
+
+    document.getElementById('submitBtn').disabled = true;
+
+    try {
+      // Attempt payment
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: window.location.origin + '?booking=success'
+        }
+      });
+
+      if (error) {
+        showError(error.message);
+        document.getElementById('submitBtn').disabled = false;
+      }
+    } catch (error) {
+      showError('Booking failed: ' + error.message);
+      document.getElementById('submitBtn').disabled = false;
+    }
+  }
+
+  function showError(message) {
+    const errorEl = document.getElementById('errorMessage');
+    errorEl.textContent = message;
+    errorEl.classList.add('show');
+  }
+</script>
+
+</body>
+</html>
