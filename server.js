@@ -33,6 +33,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Serve booking-step2.html
+app.get('/booking-step2.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'booking-step2.html'));
+});
+
 // Serve admin.html
 app.get('/admin.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'admin.html'));
