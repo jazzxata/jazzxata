@@ -58,6 +58,11 @@
     backdrop-filter: blur(12px);
     border-bottom: 1px solid transparent;
     transition: border-color 0.3s, padding 0.3s;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100%;
+    height: auto;
   }
   nav.top.scrolled { border-bottom-color: var(--tan); padding: 0.75rem 2rem; }
   .nav-inner {
@@ -1435,8 +1440,16 @@
 
   // ============ STICKY NAV & FAQ ============
   const nav = document.getElementById('topNav');
+  console.log('🔍 Nav element found:', nav);
+  if (nav) {
+    console.log('✅ Nav element exists, display:', window.getComputedStyle(nav).display);
+    console.log('✅ Nav element visibility:', window.getComputedStyle(nav).visibility);
+    console.log('✅ Nav element z-index:', window.getComputedStyle(nav).zIndex);
+  } else {
+    console.error('❌ Nav element not found!');
+  }
   window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 20);
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 20);
   });
 
   document.querySelectorAll('.faq-item').forEach(item => {
